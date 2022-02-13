@@ -1,0 +1,7 @@
+.DS_Store
+*.map
+*.min.js
+coverage
+dist
+main-built.js
+node_modules
