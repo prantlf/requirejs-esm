@@ -137,5 +137,5 @@ Licensed under the MIT license.
 [PNPM]: https://pnpm.io/
 [Yarn]: https://yarnpkg.com/
 [demo]: https://github.com/prantlf/requirejs-esm/tree/master/demo
-[default module name resolution]: https://github.com/prantlf/requirejs-esm/blob/master/esm.js#L38
+[default module name resolution]: https://github.com/prantlf/requirejs-esm/blob/master/src/resolve-path.js#L48
 [resolvePath]: https://github.com/tleunen/babel-plugin-module-resolver/blob/master/DOCS.md#resolvepath
