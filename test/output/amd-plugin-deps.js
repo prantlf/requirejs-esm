@@ -1,1 +1,1 @@
-define(["plug!name"], function () {});
+define(['plug!name'], function () {})

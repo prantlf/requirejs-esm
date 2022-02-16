@@ -14,9 +14,8 @@ commander.description('Transforms an ESM module to AMD or adapts an AMD module f
   .option('-p, --plugin <name>', 'change the plugin name from "esm" to other name')
   .option('-o, --output <file>', 'write the adapted module source to a file')
   .option('-r, --rewrite', 'rewrite the input files with the adapted output')
-  // .option('-m, --minify', 'minify the generated output')
   .option('-s, --source-map', 'write inline source maps to the adapted output')
-  .option('-v, --verbose', 'print call stack in case of error')
+  .option('-v, --verbose', 'print progress and call stack in case of error')
   .on('--help', function () {
     console.log()
     console.log('You can use one or more file names or one or more glob patterns to specify one')
@@ -31,9 +30,14 @@ commander.description('Transforms an ESM module to AMD or adapts an AMD module f
   .parse(process.argv)
 
 const {
-  /*ecma: ecmaVersion,*/ plugin: pluginName, /*minify,*/ sourceMap, output: outputFile, rewrite, verbose
+  /*ecma: ecmaVersion,*/
+  plugin: pluginName,
+  sourceMap,
+  output: outputFile,
+  rewrite,
+  verbose
 } = commander.opts()
-const { args } = commander;
+const { args } = commander
 if (!args.length) {
   commander.help()
 }
@@ -47,7 +51,12 @@ if (!args.length) {
     }
     for (const file of files) {
       const text = await readFile(file, 'utf8')
-      const code = transform(text, file, { /*ecmaVersion,*/ pluginName, /*minify,*/ sourceMap })
+      const code = transform(text, file, {
+        /*ecmaVersion,*/
+        pluginName,
+        sourceMap,
+        verbose
+      })
       if (outputFile) {
         await writeFile(outputFile, code)
       } else if (rewrite) {
@@ -60,4 +69,4 @@ if (!args.length) {
     console.error((!verbose && error.message) || error)
     process.exitCode = 1
   }
-}());
+}())

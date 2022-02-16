@@ -85,15 +85,16 @@ export function updateAmdDeps(amd, options) {
   const { elements } = deps
   if (!elements.length) return
 
+  let updated
   for (const element of elements) {
     if (element.type === 'Literal') {
       const moduleName = element.value
       const newModuleName = resolvePath(moduleName, parentName, options)
       if (newModuleName && newModuleName !== moduleName) {
         replaceLiteral(element, newModuleName)
+        updated = true
       }
     }
   }
-
-  return true
+  return updated
 }

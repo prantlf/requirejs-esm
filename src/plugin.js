@@ -1,6 +1,7 @@
 /* global module */
 
 import fetchText from './fetch-text'
+import writeText from './write-text'
 import { setSkipModules, skipModule } from './skip-module'
 import transformSource from './transform'
 
@@ -16,9 +17,14 @@ const {
   skipModules = [],
   // Method to update paths of module dependencies, to prefix JavaScript module
   // name with `esm!`, above all.
-  resolvePath
-  // minify
-  // ecmaVersion
+  resolvePath,
+  // ecmaVersion,
+  // Boolean or object with booleans { inline, content }.
+  sourceMap,
+  // Enable console logging.
+  verbose,
+  // Directory to save a copy of the transformed modules.
+  debugDir
 } = typeof module !== 'undefined' && module.config && module.config() || {}
 
 const buildMap = {}
@@ -28,6 +34,7 @@ setSkipModules(skipModules)
 //>>excludeEnd('excludeEsm')
 export default {
   load(name, req, onload, reqConfig) {
+    verbose && console.log('esm: loading', name)
     // If the module has been already defined from a module bundle, it was
     // already transpiled, when the output bundle was written. No need to
     // re-transpile it. This can happen only during the runtime.
@@ -43,6 +50,7 @@ export default {
     // modules can be loaded just by `require` to get better performance.
     if (!mixedAmdAndEsm && !reqConfig.isBuild && req.specified(name) ||
         onlyAmd || skipModule(name)) {
+      verbose && console.log('esm: delegating', name)
       return req([name], onload, onload.error)
     }
 //>>excludeStart('excludeEsm', pragmas.excludeEsm)
@@ -56,26 +64,40 @@ export default {
     // are external and will be loaded during the runtime.
     const url = req.toUrl(file)
     if (url.startsWith('empty:')) {
+      verbose && console.log('esm: skipping', name, 'mapped to', url)
       return onload()
     }
 
     // Fetch the text of the source module by AJAX and transpile it.
+    verbose && console.log('esm: fetching', name, 'mapped to', url)
     fetchText(url, async (error, text) => {
       if (error) {
+        verbose && console.log('esm: missing', name)
         return onload.error(error)
       }
 
-      let code
+      let code, updated
       try {
-        // Always produce the source maps when transpiling in the browser, otherwise
-        // the debugging would me impossible. When building and bundling, check if
-        // the source maps were enabled for the output.
-        const sourceMap = !reqConfig.isBuild || reqConfig.generateSourceMaps
-        code = transformSource(text, file, { pluginName, resolvePath, /*ecmaVersion, minify,*/ sourceMap })
+        verbose && console.log('esm: transforming', name);
+        ({ code, updated } = transformSource(text, file, {
+          pluginName,
+          resolvePath,
+          /*ecmaVersion,*/
+          // Always produce the source maps when transpiling in the browser, otherwise
+          // the debugging would me impossible. When building and bundling, check if
+          // the source maps were enabled for the output.
+          sourceMap: sourceMap || !reqConfig.isBuild
+        }))
+        if (!updated) {
+          verbose && console.log('esm: retaining', name)
+          // return req([name], onload, onload.error)
+        } else if (reqConfig.isBuild && debugDir) {
+          writeText(`${debugDir}/${file}`, code)
+        }
       } catch (error) {
         // RequireJS did not always log this error.
-        console.log(`Transforming "${name}" (resolved to "${url}") failed:`)
-        console.log(error)
+        console.error(`Transforming "${name}" (resolved to "${url}") failed:`)
+        console.error(error)
         return onload.error(error)
       }
 
@@ -84,6 +106,7 @@ export default {
         buildMap[name] = code
       }
 
+      verbose && console.log('esm: returning', name)
       onload.fromText(code)
     })
   },

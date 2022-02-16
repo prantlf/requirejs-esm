@@ -100,7 +100,7 @@
     "terser": "^5.10.0"
   },
   "optionalDependencies": {
-    "@babel/standalone": "^7.17.2",
+    "@babel/standalone": "^7.17.4",
     "babel-plugin-transform-modules-requirejs-babel": "^0.1.0",
     "benchmark": "^2.1.4",
     "filesize": "^8.0.7",

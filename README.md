@@ -4,7 +4,7 @@
  ![Dependency status](https://img.shields.io/librariesio/release/npm/requirejs-esm)
 ](https://www.npmjs.com/package/requirejs-esm)
 
-A [RequireJS] plugin converting JavaScript modules from ESM to AMD. It takes care only of the module format; it does not transpile the language and that is why it is a lot faster than plugins using [Babel]. If you need to transpile the code to an earlier ECMAScript version, have a look at [requirejs-babel7].
+A [RequireJS] plugin converting JavaScript modules from ESM to AMD. It takes care only of the module format; it does not transpile the language and that is why it is [a lot faster] than plugins using [Babel]. If you need to transpile the code to an earlier ECMAScript version, have a look at [requirejs-babel7].
 
 The official [RequireJS optimizer] (`r.js`) does not wire up source maps from the original (not transpiled) sources to the source map of the output bundle. It makes this or similar plugins unfeasible for serious work. If you want the proper support for source maps, replace the official optimizer package ([`requirejs`]) with the forked [`@prantlf/requirejs`], which is fixed.
 
@@ -111,8 +111,51 @@ The `esm` plugin supports configuration with the following defaults:
     // Enforce transpiling even if a optimized module has been loaded.
     mixedAmdAndEsm: false,
     // Suppress transpiling even if an optimized module has not been loaded yet.
-    onlyAmd: false
+    onlyAmd: false,
+    // Enable source maps, can be an object with booleans { inline, content }.
+    // If set to true, the object will be set to { inline: true, content: true }.
+    sourceMap: false,
+    // Enable console logging.
+    verbose: false,
+    // Save a copy of the transformed modules to a directory for debugging purposes.
+    debugDir: ''
   }
+}
+```
+
+## API
+
+The transformation applied by the plugin can be performed programmatically too.
+
+```js
+const { transform } = require('requirejs-esm/dist/api')
+const { code }  = transform('import a from "a"', 'test', { sourceMap: true })
+```
+
+The `transform` method supports a subset of plugin options:
+
+```js
+{
+  // Update paths of module dependencies.
+  resolvePath: func,
+  // Allow using a different plugin alias than `esm` in the source code.
+  pluginName: 'esm',
+  // Enable source maps, can be an object with booleans { inline, content }.
+  // If set to true, the object will be set to { inline: true, content: true }.
+  sourceMap: false
+}
+```
+
+The returned object:
+
+```js
+{
+  // The transpiled module code.
+  code: '...',
+  // The source map if sourceMap.inline from the options above is false.
+  map: undefined | { ... },
+  // If the transpilation modified the original source text.
+  updated: false | true
 }
 ```
 
@@ -139,3 +182,4 @@ Licensed under the MIT license.
 [demo]: https://github.com/prantlf/requirejs-esm/tree/master/demo
 [default module name resolution]: https://github.com/prantlf/requirejs-esm/blob/master/src/resolve-path.js#L48
 [resolvePath]: https://github.com/tleunen/babel-plugin-module-resolver/blob/master/DOCS.md#resolvepath
+[a lot faster]: ./perf/README.md#readme

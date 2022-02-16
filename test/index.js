@@ -8,17 +8,14 @@ const { transform } = require('../dist/api')
 const { req, config, onload } = require('./mock')
 
 test('transform with sourcemap', function () {
-  const code = transform('import A from "name"', 'test.js', { sourceMap: true })
+  const code = transform('import A from "name"', 'test.js', { sourceMap: true }).code
   equal(code, `define(["esm!name"], function (A) {});
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMifQ==`)
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`)
 })
 
 async function pluginLoad(input) {
   const dir = relative(process.cwd(), __dirname)
   onload.init()
-  // console.log('********************')
-  // console.log(process.cwd(), source, dir, input)
-  // console.log('********************')
   load(join(dir, 'input', input), req, onload, config)
   const actual = await onload.promise
   const expected = await readFile(join(dir, 'output', input), 'utf8')
@@ -56,7 +53,7 @@ test('use plugin', async function () {
 async function testPluginSingle(input) {
   const content = await readFile(join(__dirname, 'input', input), 'utf8')
   const name = input === 'amd-relative.js' ? `test/input/${input}` : input
-  const actual = transform(content, name).trimEnd()
+  const actual = transform(content, name).code.trimEnd()
   const expected = (await readFile(join(__dirname, 'output', input), 'utf8')).trimEnd()
   if (expected !== actual) {
     throw new Error(`expected !== actual (${expected.length}, ${actual.length})

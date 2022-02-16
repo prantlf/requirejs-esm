@@ -13,6 +13,12 @@
   generateSourceMaps: true,
   preserveLicenseComments: false,
 
+  config: {
+    esm: {
+      sourceMap: true
+    }
+  },
+
   pragmasOnSave: {
     excludeEsm: true
   }
