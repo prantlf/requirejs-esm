@@ -1,4 +1,4 @@
-import { default as originalResolvePath } from './resolve-path'
+import { resolvePath as originalResolvePath } from './resolve-path'
 // import { parse } from 'acorn'
 import { parseModule } from 'meriyah'
 import { generate } from 'astring'

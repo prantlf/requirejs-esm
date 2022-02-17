@@ -1,3 +1,17 @@
+// Returns the child file name by cutting the directoris before the last slash,
+// including the slash. If there is no slash in the path - the path is just
+// a file name, it will return the file name. If the path includes a URL
+// query starting with the question mark, it will cut it away including the
+// question mark.
+export function childFile (path) {
+  const lastSlash = path.lastIndexOf('/')
+  if (lastSlash > 0) {
+    path = path.substring(lastSlash + 1)
+  }
+  const questionMark = path.lastIndexOf('?')
+  return questionMark > 0 ? path.substring(0, questionMark) : path
+}
+
 // Returns the parent directory by cutting the file name after the last slash,
 // leaving the slash in the result. If there is no slash in the path - the path
 // is just a file name, it will return `undefined`.
@@ -45,7 +59,7 @@ function joinPath (first, second) {
 
 // Ensures that every JavaScript dependency will be prefixed by `esm!`.
 // Relative paths will be converted to be relative to the parent module.
-export default function resolvePath (sourcePath, currentFile, { pluginName }) {
+export function resolvePath (sourcePath, currentFile, { pluginName }) {
   // Ignore paths with other plugins applied and the three built-in
   // pseudo-modules of RequireJS.
   if (!pluginName || sourcePath.includes('!') || sourcePath === 'require' ||

@@ -11,12 +11,14 @@ function patchCover(lines) {
 async function patchBundle(lines) {
   lines.splice(0, 5,
     '(function (global, factory) {',
-    '  typeof exports === \'object\' && typeof module !== \'undefined\' ? module.exports = factory() :',
     '  typeof define === \'function\' && define.amd ? define([',
     '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)',
     '      \'module\'',
     '//>>excludeEnd(\'excludeEsm\')',
     '    ], factory) :',
+    '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)',
+    '  typeof exports === \'object\' && typeof module !== \'undefined\' ? module.exports = factory() :',
+    '//>>excludeEnd(\'excludeEsm\')',
     '  (global = typeof globalThis !== \'undefined\' ? globalThis : global || self, global.requirejsEsmPlugin = factory());',
     '})(this, (function (',
     '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)',
@@ -34,7 +36,7 @@ async function updateSourceMap(content, dir) {
     consumer.eachMapping(mapping => {
       const newMapping = {
         generated: {
-          line: mapping.generatedLine + 9,
+          line: mapping.generatedLine + 11,
           column: mapping.generatedColumn
         }
       }
