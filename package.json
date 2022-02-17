@@ -1,6 +1,6 @@
 {
   "name": "requirejs-esm",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A RequireJS plugin converting JavaScript modules from ESM to AMD.",
   "author": "Ferdinand Prantl <prantlf@gmail.com>",
   "license": "MIT",

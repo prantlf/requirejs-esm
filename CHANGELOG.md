@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/prantlf/requirejs-esm/compare/v1.0.0...v1.0.1) (2022-02-17)
+
+
+### Bug Fixes
+
+* Do not transpile modules loaded from a bundle ([18c47d4](https://github.com/prantlf/requirejs-esm/commit/18c47d4658d5f76e614302193d2a114b84ff3545))
+
 # 1.0.0 (2022-02-16)
 
 
