@@ -52,7 +52,7 @@ See also a [demo] project:
 
 ```sh
 npm start
-open http://localhost:8967/demo/normal.html
+open http://localhost:8967/demo-plugin/normal.html
 ```
 
 ## Advanced
@@ -179,7 +179,7 @@ Licensed under the MIT license.
 [NPM]: https://www.npmjs.com/
 [PNPM]: https://pnpm.io/
 [Yarn]: https://yarnpkg.com/
-[demo]: https://github.com/prantlf/requirejs-esm/tree/master/demo
+[demo]: https://github.com/prantlf/requirejs-esm/tree/master/demo-plugin
 [default module name resolution]: https://github.com/prantlf/requirejs-esm/blob/master/src/resolve-path.js#L48
 [resolvePath]: https://github.com/tleunen/babel-plugin-module-resolver/blob/master/DOCS.md#resolvepath
 [a lot faster]: ./perf/README.md#readme

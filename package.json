@@ -30,11 +30,11 @@
     "dist"
   ],
   "scripts": {
-    "prepare": "npm run build && npm run demo",
+    "prepare": "npm run build && npm run demo:plugin",
     "build": "node build",
-    "demo": "npm run optimize && npm run minify",
-    "optimize": "r.js -o demo/build.config.js",
-    "minify": "terser -cm --ecma 2018 --comments false --source-map content=demo/main-built.js.map --source-map includeSources --source-map url=main-built.min.js.map -o demo/main-built.min.js demo/main-built.js",
+    "demo:plugin": "npm run optimize:plugin && npm run minify:plugin",
+    "optimize:plugin": "r.js -o demo-plugin/build.config.js",
+    "minify:plugin": "terser -cm --ecma 2018 --comments false --source-map content=demo-plugin/main-built.js.map --source-map includeSources --source-map url=main-built.min.js.map -o demo-plugin/main-built.min.js demo-plugin/main-built.js",
     "lint": "eslint -c .eslintrc.browser.yml src && eslint -c .eslintrc.node.yml *.js perf/*.js bin 'test/*.js'",
     "check": "tehanu test/*.js",
     "cover": "c8 node test && c8 --no-clean ./bin/esm2requirejs.js && c8 --no-clean ./bin/esm2requirejs.js test/input/esm-import-all.js && c8 --no-clean ./bin/esm2requirejs.js dummy || c8 report -r text -r lcov | grep -Ev '(\\.\\.\\.)|(index.mjs)|(source-map.js)|(base64-vlq.js)|(base64.js)|(binary-search.js)|(mapping-list.js)|(read-wasm-browser.js)|(url-browser.js)|(wasm.js)|(regexes.js)|(public-api.js)|(All files)'",

@@ -34,7 +34,7 @@ function startServer ({ root = '.', port = 8967 } = {}) {
         reject(error)
       })
       .listen(port, () => {
-        console.log('The local web server is listening at th port 8967...')
+        console.log(`The local web server is listening on the port ${port}...`)
         resolve({ server, port })
       })
   })
