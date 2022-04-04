@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/prantlf/requirejs-esm/compare/v1.0.1...v1.0.2) (2022-04-04)
+
+
+### Bug Fixes
+
+* Do not install dependencies for performance measuring at the consumer ([a460fc4](https://github.com/prantlf/requirejs-esm/commit/a460fc4f573065d72ed6ed8e9fd88ce8948af187))
+
 ## [1.0.1](https://github.com/prantlf/requirejs-esm/compare/v1.0.0...v1.0.1) (2022-02-17)
 
 
