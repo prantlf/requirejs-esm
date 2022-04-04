@@ -8,6 +8,8 @@ A [RequireJS] plugin converting JavaScript modules from ESM to AMD. It takes car
 
 The official [RequireJS optimizer] (`r.js`) does not wire up source maps from the original (not transpiled) sources to the source map of the output bundle. It makes this or similar plugins unfeasible for serious work. If you want the proper support for source maps, replace the official optimizer package ([`requirejs`]) with the forked [`@prantlf/requirejs`], which is fixed.
 
+An alternative to this plugin is a preprocessor, which converts the module format before RequireJS consumes it. It is a lot less intrusive solution, but it requires a pluggable development web server, so that a plugin (compatible with [connect middleware]) can be registered in it. See [requirejs-esm-preprocessor] for more information.
+
 ## Installation
 
 This module can be installed in your project using [NPM], [PNPM] or [Yarn]. Make sure, that you use [Node.js] version 14 or newer.
@@ -182,6 +184,8 @@ Licensed under the MIT license.
 [RequireJS]: http://requirejs.org
 [RequireJS optimizer]: https://requirejs.org/docs/optimization.html
 [requirejs-babel7]: https://www.npmjs.com/package/requirejs-babel7
+[requirejs-esm-preprocessor]: https://www.npmjs.com/package/requirejs-esm-preprocessor
+[connect middleware]: https://github.com/senchalabs/connect/wiki
 [`requirejs`]: https://www.npmjs.com/package/requirejs
 [`@prantlf/requirejs`]: https://www.npmjs.com/package/@prantlf/requirejs
 [Node.js]: http://nodejs.org/
