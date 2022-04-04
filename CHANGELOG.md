@@ -1,3 +1,10 @@
+# [1.1.0](https://github.com/prantlf/requirejs-esm/compare/v1.0.2...v1.1.0) (2022-04-04)
+
+
+### Features
+
+* Allow transpiling without resolving relative paths and without plugin prefixing ([811419d](https://github.com/prantlf/requirejs-esm/commit/811419de01a57359bf154933abdf4fa5c0ee5d7a))
+
 ## [1.0.2](https://github.com/prantlf/requirejs-esm/compare/v1.0.1...v1.0.2) (2022-04-04)
 
 
