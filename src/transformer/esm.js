@@ -279,11 +279,8 @@ function buildAmdModule(program, options, importPaths, importVars, namedImports)
 // Update dependency paths to be prefixed by `esm!` or otherwise updated.
 function prepareImportPaths(importPaths, options ) {
   const { resolvePath } = options
-  if (!resolvePath) return
-
   if (resolvePath) {
     const { sourceFileName: parentName } = options
-
     for (const importPath of importPaths) {
       if (importPath.type === 'Literal') {
         const moduleName = importPath.value
@@ -294,6 +291,5 @@ function prepareImportPaths(importPaths, options ) {
       }
     }
   }
-
   return arrayExpression(importPaths)
 }

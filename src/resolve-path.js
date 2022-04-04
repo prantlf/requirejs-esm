@@ -59,19 +59,22 @@ function joinPath (first, second) {
 
 // Ensures that every JavaScript dependency will be prefixed by `esm!`.
 // Relative paths will be converted to be relative to the parent module.
-export function resolvePath (sourcePath, currentFile, { pluginName }) {
+export function resolvePath (sourcePath, currentFile, { pluginName, needsResolve } = {}) {
   // Ignore paths with other plugins applied and the three built-in
   // pseudo-modules of RequireJS.
-  if (!pluginName || sourcePath.includes('!') || sourcePath === 'require' ||
+  if (sourcePath.includes('!') || sourcePath === 'require' ||
       sourcePath === 'module' || sourcePath === 'exports') return
 
   // If `sourcePath` is relative to `currentFile` - starts with ./ or ../ -
   // prepend the parent directory of `currentFile` to it. This was needed
   // for modules located outside the source root (`baseUrl`), which were
   // mapped there using the `paths` of `map` configuration properties.
-  if (sourcePath.charAt(0) === '.' && (sourcePath.charAt(1) === '/' ||
-      sourcePath.charAt(1) === '.' && sourcePath.charAt(2) === '/')) {
+  if ((sourcePath.charAt(0) === '.' && (sourcePath.charAt(1) === '/' ||
+       sourcePath.charAt(1) === '.' && sourcePath.charAt(2) === '/')) &&
+      !(needsResolve && needsResolve(sourcePath, currentFile))) {
     sourcePath = joinPath(parentDir(currentFile), sourcePath)
+    if (sourcePath.endsWith('.js')) sourcePath = sourcePath.substring(0, sourcePath.length - 3)
   }
-  return `${pluginName}!${sourcePath}`
+
+  return pluginName ? `${pluginName}!${sourcePath}` : sourcePath
 }

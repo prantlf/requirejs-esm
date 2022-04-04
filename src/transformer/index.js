@@ -6,7 +6,7 @@ export default function transformModules(program, options) {
   const { length } = amds
   if (length) {
     options.amd = true
-    if (options.pluginName) {
+    if (options.resolvePath) {
       for (const amd of amds) {
         options.updated |= updateAmdDeps(amd, options)
       }
