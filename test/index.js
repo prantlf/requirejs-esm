@@ -3,7 +3,7 @@ const { join, relative } = require('path')
 const { equal } = require('assert')
 const tehanu = require('tehanu')
 const test = tehanu('esm')
-const { load, write } = require('..')
+const { load, write } = require('../dist/plugin')
 const { transform } = require('../dist/api')
 const { req, config, onload } = require('./mock')
 

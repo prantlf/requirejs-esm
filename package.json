@@ -21,7 +21,7 @@
   "engines": {
     "node": ">=14"
   },
-  "main": "dist/plugin.js",
+  "main": "dist/api.js",
   "bin": {
     "esm2requirejs": "bin/esm2requirejs.js"
   },
