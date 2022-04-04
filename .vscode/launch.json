@@ -14,12 +14,29 @@
       ]
     },
     {
-      "name": "optimize",
+      "name": "optimize-local",
       "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/node_modules/@prantlf/requirejs/bin/r.js",
-      "args": ["-o", "demo/build.config.js"],
+      "args": ["-o", "demo-local/build.config.js"],
       "skipFiles": []
+    },
+    {
+      "name": "optimize-extern",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/node_modules/@prantlf/requirejs/bin/r.js",
+      "args": ["-o", "demo-extern/build.config.js"],
+      "skipFiles": []
+    },
+    {
+      "name": "serve",
+      "type": "pwa-node",
+      "request": "launch",
+      "program": "${workspaceFolder}/server.js",
+      "skipFiles": [
+        "<node_internals>/**"
+      ]
     },
     {
       "name": "test",

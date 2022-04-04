@@ -30,14 +30,18 @@
     "dist"
   ],
   "scripts": {
-    "prepare": "npm run build && npm run demo:plugin",
+    "prepare": "npm run build && npm run demo",
     "build": "node build",
-    "demo:plugin": "npm run optimize:plugin && npm run minify:plugin",
-    "optimize:plugin": "r.js -o demo-plugin/build.config.js",
-    "minify:plugin": "terser -cm --ecma 2018 --comments false --source-map content=demo-plugin/main-built.js.map --source-map includeSources --source-map url=main-built.min.js.map -o demo-plugin/main-built.min.js demo-plugin/main-built.js",
+    "demo": "npm run demo:extern && npm run demo:local",
+    "demo:extern": "npm run optimize:extern && npm run minify:extern",
+    "optimize:extern": "r.js -o demo-extern/build.config.js",
+    "minify:extern": "terser -cm --ecma 2018 --comments false --source-map content=demo-extern/main-built.js.map --source-map includeSources --source-map url=main-built.min.js.map -o demo-extern/main-built.min.js demo-extern/main-built.js",
+    "demo:local": "npm run optimize:local && npm run minify:local",
+    "optimize:local": "r.js -o demo-local/build.config.js",
+    "minify:local": "terser -cm --ecma 2018 --comments false --source-map content=demo-local/main-built.js.map --source-map includeSources --source-map url=main-built.min.js.map -o demo-local/main-built.min.js demo-local/main-built.js",
     "lint": "eslint -c .eslintrc.browser.yml src && eslint -c .eslintrc.node.yml *.js perf/*.js bin 'test/*.js'",
     "check": "tehanu test/*.js",
-    "cover": "c8 node test && c8 --no-clean ./bin/esm2requirejs.js && c8 --no-clean ./bin/esm2requirejs.js test/input/esm-import-all.js && c8 --no-clean ./bin/esm2requirejs.js dummy || c8 report -r text -r lcov | grep -Ev '(\\.\\.\\.)|(index.mjs)|(source-map.js)|(base64-vlq.js)|(base64.js)|(binary-search.js)|(mapping-list.js)|(read-wasm-browser.js)|(url-browser.js)|(wasm.js)|(regexes.js)|(public-api.js)|(All files)'",
+    "cover": "c8 node test && c8 --no-clean ./bin/esm2requirejs.js && c8 --no-clean ./bin/esm2requirejs.js test/input/esm-import-all.js && c8 --no-clean ./bin/esm2requirejs.js dummy || c8 report -r text -r lcov | grep -Ev '(\\.\\.\\.)|(index.mjs)|(source-map.js)|(base64-vlq.js)|(base64.js)|(binary-search.js)|(mapping-list.js)|(read-wasm-browser.js)|(url-browser.js)|(wasm.js)|(regexes.js)|(public-api.js)|(All files)' && c8 check-coverage",
     "test": "npm run lint && npm run cover"
   },
   "tehanu": {
@@ -54,10 +58,10 @@
       "node_modules/**"
     ],
     "reporter": [],
-    "branches": 65,
-    "lines": 85,
-    "functions": 95,
-    "statements": 80
+    "branches": 45,
+    "lines": 45,
+    "functions": 20,
+    "statements": 45
   },
   "release": {
     "plugins": [
@@ -91,20 +95,15 @@
     "eslint": "^8.12.0",
     "lit-html": "^1",
     "meriyah": "^4.2.1",
+    "morgan": "^1.10.0",
     "rollup": "^2.70.1",
+    "serve-index": "^1.9.1",
     "serve-static": "^1.15.0",
     "source-map": "^0.8.0-beta.0",
     "tehanu": "^0.2.1",
     "tehanu-repo-coco": "^0.0.2",
     "tehanu-teru": "^0.2.2",
     "terser": "^5.12.1"
-  },
-  "optionalDependencies": {
-    "@babel/standalone": "^7.17.8",
-    "babel-plugin-transform-modules-requirejs-babel": "^0.1.0",
-    "benchmark": "^2.1.4",
-    "filesize": "^8.0.7",
-    "requirejs-babel7": "^1.3.2"
   },
   "keywords": [
     "requirejs-plugin",
@@ -116,6 +115,9 @@
   ],
   "dependencies": {
     "commander": "^9.1.0",
+    "cors": "^2.8.5",
+    "mime": "^3.0.0",
+    "polka": "^0.5.2",
     "tiny-glob": "^0.2.9"
   }
 }

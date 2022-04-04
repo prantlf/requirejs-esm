@@ -10,7 +10,7 @@ The official [RequireJS optimizer] (`r.js`) does not wire up source maps from th
 
 ## Installation
 
-This module can be installed in your project using [NPM], [PNPM] or [Yarn]. Make sure, that you use [Node.js] version 6 or newer.
+This module can be installed in your project using [NPM], [PNPM] or [Yarn]. Make sure, that you use [Node.js] version 14 or newer.
 
 ```sh
 npm i -D requirejs-esm
@@ -48,11 +48,20 @@ pragmasOnSave: {
 }
 ```
 
-See also a [demo] project:
+See also a [demo-local] project, which includes sources only from the local `src` directory:
 
 ```sh
 npm start
-open http://localhost:8967/demo-plugin/normal.html
+open http://localhost:8967/demo-local/normal.html
+open http://localhost:8967/demo-local/optimized.html
+```
+
+See also a [demo-extern] project, which includes sources from the local `src` directory and from `node_modules` outside of it:
+
+```sh
+npm run start
+open http://localhost:8967/demo-extern/normal.html
+open http://localhost:8967/demo-extern/optimized.html
 ```
 
 ## Advanced
@@ -179,7 +188,8 @@ Licensed under the MIT license.
 [NPM]: https://www.npmjs.com/
 [PNPM]: https://pnpm.io/
 [Yarn]: https://yarnpkg.com/
-[demo]: https://github.com/prantlf/requirejs-esm/tree/master/demo-plugin
+[demo-local]: https://github.com/prantlf/requirejs-esm/tree/master/demo-local
+[demo-extern]: https://github.com/prantlf/requirejs-esm/tree/master/demo-extern
 [default module name resolution]: https://github.com/prantlf/requirejs-esm/blob/master/src/resolve-path.js#L48
 [resolvePath]: https://github.com/tleunen/babel-plugin-module-resolver/blob/master/DOCS.md#resolvepath
 [a lot faster]: ./perf/README.md#readme
