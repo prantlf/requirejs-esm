@@ -1,3 +1,20 @@
+# [2.0.0](https://github.com/prantlf/requirejs-esm/compare/v1.1.0...v2.0.0) (2022-04-04)
+
+
+### Bug Fixes
+
+* Mark `dist/api` as the main module instead of `dist/plugin` ([ddbaefa](https://github.com/prantlf/requirejs-esm/commit/ddbaefa68d1a649a0b3aa0862fe66fd9ce3a67d4))
+
+
+### BREAKING CHANGES
+
+* `dist/api` is the main module in `package.json` instead of `dist/plugin`.
+
+The plugin was not meant to import. The API contained named exports
+to be consumed. If you did import the plugin, use the full path
+`requirejs-esm/dist/plugin`, just like it was used in the RequireJS
+configuration of the `esm` path alias.
+
 # [1.1.0](https://github.com/prantlf/requirejs-esm/compare/v1.0.2...v1.1.0) (2022-04-04)
 
 
