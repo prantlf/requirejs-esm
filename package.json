@@ -100,7 +100,7 @@
     "serve-index": "^1.9.1",
     "serve-static": "^1.15.0",
     "source-map": "^0.8.0-beta.0",
-    "tehanu": "^0.2.1",
+    "tehanu": "^0.2.2",
     "tehanu-repo-coco": "^0.0.2",
     "tehanu-teru": "^0.2.2",
     "terser": "^5.12.1"

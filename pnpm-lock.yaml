@@ -26,7 +26,7 @@ specifiers:
   serve-index: ^1.9.1
   serve-static: ^1.15.0
   source-map: ^0.8.0-beta.0
-  tehanu: ^0.2.1
+  tehanu: ^0.2.2
   tehanu-repo-coco: ^0.0.2
   tehanu-teru: ^0.2.2
   terser: ^5.12.1
@@ -61,9 +61,9 @@ devDependencies:
   serve-index: 1.9.1
   serve-static: 1.15.0
   source-map: 0.8.0-beta.0
-  tehanu: 0.2.1
+  tehanu: 0.2.2
   tehanu-repo-coco: 0.0.2
-  tehanu-teru: 0.2.2_tehanu@0.2.1
+  tehanu-teru: 0.2.2_tehanu@0.2.2
   terser: 5.12.1
 
 packages:
@@ -1503,19 +1503,19 @@ packages:
     engines: {node: '>=12'}
     dev: true
 
-  /tehanu-teru/0.2.2_tehanu@0.2.1:
+  /tehanu-teru/0.2.2_tehanu@0.2.2:
     resolution: {integrity: sha512-N/yUuWjcT02+7PdMv6dw57UWTnxwPU89oHXbAZkHkIRcCywyWNBMi+b/ZZ9Fkh1sUegbsGqNt5Reoj7GgW4VQw==}
     engines: {node: '>=12'}
     hasBin: true
     peerDependencies:
       tehanu: ^0.2.1
     dependencies:
-      tehanu: 0.2.1
+      tehanu: 0.2.2
       tiny-glob: 0.2.9
     dev: true
 
-  /tehanu/0.2.1:
-    resolution: {integrity: sha512-WAPPWoTrS6LCXuNciryE/armfZ34YKD3KBjq/SFozj7XyrAg0DszNZtaZfH8mNUO+g5KX6ftxDm0yUHs3Ba1NA==}
+  /tehanu/0.2.2:
+    resolution: {integrity: sha512-N4TZWIWMQD9Y8ZPYtCTYyWJSKO/oPDSyr3ke8OwhB3NX+LDH67V7ICJ/g9DICrnRdR8UFuddCl2cqfTMZXrEkQ==}
     engines: {node: '>=12'}
     dev: true
 
