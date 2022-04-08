@@ -1,3 +1,11 @@
+## [2.0.1](https://github.com/prantlf/requirejs-esm/compare/v2.0.0...v2.0.1) (2022-04-08)
+
+
+### Bug Fixes
+
+* Allow esnext code ([fb69de9](https://github.com/prantlf/requirejs-esm/commit/fb69de9cd00672655213d5beffe4a6dc92d41949))
+* Update the testing command-line tool after the API change ([23b6d7f](https://github.com/prantlf/requirejs-esm/commit/23b6d7f80fb49fa1a7eb74c451cb46ef4d4e059a))
+
 # [2.0.0](https://github.com/prantlf/requirejs-esm/compare/v1.1.0...v2.0.0) (2022-04-04)
 
 
