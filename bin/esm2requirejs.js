@@ -51,18 +51,22 @@ if (!args.length) {
     }
     for (const file of files) {
       const text = await readFile(file, 'utf8')
-      const code = transform(text, file, {
+      const { code, updated } = transform(text, file, {
         /*ecmaVersion,*/
         pluginName,
         sourceMap,
         verbose
       })
-      if (outputFile) {
-        await writeFile(outputFile, code)
-      } else if (rewrite) {
-        await writeFile(file, code)
+      if (updated) {
+        if (outputFile) {
+          await writeFile(outputFile, code)
+        } else if (rewrite) {
+          await writeFile(file, code)
+        } else {
+          console.log(`// ${file}\n\n${code}`)
+        }
       } else {
-        console.log(`// ${file}\n\n${code}`)
+        console.log(`// ${file}\n\nnot updated`)
       }
     }
   } catch (error) {
