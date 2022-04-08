@@ -80,7 +80,7 @@
   },
   "devDependencies": {
     "@prantlf/convert-source-map": "^2.0.0",
-    "@prantlf/requirejs": "^2.5.0",
+    "@prantlf/requirejs": "^3.0.0",
     "@rollup/plugin-commonjs": "^21.0.3",
     "@rollup/plugin-json": "^4.1.0",
     "@rollup/plugin-node-resolve": "^13.1.3",
