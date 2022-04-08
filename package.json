@@ -96,6 +96,7 @@
     "lit-html": "^1",
     "meriyah": "^4.2.1",
     "morgan": "^1.10.0",
+    "punycode": "^2.1.1",
     "rollup": "^2.70.1",
     "serve-index": "^1.9.1",
     "serve-static": "^1.15.0",

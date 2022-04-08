@@ -22,6 +22,7 @@ specifiers:
   mime: ^3.0.0
   morgan: ^1.10.0
   polka: ^0.5.2
+  punycode: ^2.1.1
   rollup: ^2.70.1
   serve-index: ^1.9.1
   serve-static: ^1.15.0
@@ -57,6 +58,7 @@ devDependencies:
   lit-html: 1.4.1
   meriyah: 4.2.1
   morgan: 1.10.0
+  punycode: 2.1.1
   rollup: 2.70.1
   serve-index: 1.9.1
   serve-static: 1.15.0
