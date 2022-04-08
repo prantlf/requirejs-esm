@@ -16,7 +16,7 @@ export default function transform(text, file, {
   sourceMap
 } = {}) {
   // const ast = parse(text, { ecmaVersion, sourceType: 'module', locations: true })
-  let ast = parseModule(text, { loc: true })
+  let ast = parseModule(text, { next: true, loc: true })
 
   const options = { sourceFileName: file, pluginName, resolvePath, originalResolvePath }
   transformModules(ast, options)
