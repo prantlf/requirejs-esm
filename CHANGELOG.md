@@ -1,3 +1,10 @@
+# [2.1.0](https://github.com/prantlf/requirejs-esm/compare/v2.0.1...v2.1.0) (2022-04-09)
+
+
+### Features
+
+* Expose an ESM module ([f83f8bd](https://github.com/prantlf/requirejs-esm/commit/f83f8bd1f59065927b0e6a53c577cbe139b790de))
+
 ## [2.0.1](https://github.com/prantlf/requirejs-esm/compare/v2.0.0...v2.0.1) (2022-04-08)
 
 
