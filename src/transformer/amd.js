@@ -37,8 +37,9 @@ function detectDefineOrRequireCall(expr) {
       if (length <= ++index) return false
       arg = args[index]
     }
-    return (arg.type === 'FunctionExpression' || arg.type === 'ObjectExpression') &&
-      { namespace, func, name, deps }
+    return (arg.type === 'FunctionExpression' ||
+      arg.type === 'ArrowFunctionExpression' ||
+      arg.type === 'ObjectExpression') && { namespace, func, name, deps }
   }
 
   // require([deps], success, error)
