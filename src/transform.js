@@ -4,7 +4,7 @@ import { parseModule } from 'meriyah'
 import { generate } from 'astring'
 import { SourceMapGenerator } from 'source-map'
 import convert from '@prantlf/convert-source-map'
-import transformModules from './transformer'
+import { transformAst } from './transformer'
 
 export default function transform(text, file, {
   // Allow using a different plugin alias than `esm` in the source code.
@@ -19,7 +19,7 @@ export default function transform(text, file, {
   let ast = parseModule(text, { next: true, loc: true })
 
   const options = { sourceFileName: file, pluginName, resolvePath, originalResolvePath }
-  const { updated } = transformModules(ast, options)
+  const { updated } = transformAst(ast, options)
 
   let code, map
   if (updated) {

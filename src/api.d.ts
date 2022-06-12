@@ -14,3 +14,10 @@ declare function transform(contents: string, path: string, options?: {
   sourceMap?: boolean /*= true */ }): string
 
 declare function transformAst(ast: object): { amd?: true, updated?: true }
+
+declare function detectDefinesOrRequires(ast: object): {
+  namespace?, string
+  func: CallExpression
+  name?: string
+  deps?: string[]
+}[]

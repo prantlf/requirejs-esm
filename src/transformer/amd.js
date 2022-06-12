@@ -10,11 +10,12 @@ function detectDefineOrRequireCall(expr) {
   if (length === 0) return false
 
   const { callee } = expr
-  let func
+  let namespace, func
   // namespace.define(...)
   if (callee.type === 'MemberExpression') {
     const { object } = callee
     if (object.type !== 'Identifier') return false
+    namespace = object
     func = callee.property
   } else {
     func = callee
@@ -25,9 +26,10 @@ function detectDefineOrRequireCall(expr) {
   if (func.name === 'define') {
     let index = 0
     let arg = args[index]
-    let deps
+    let name, deps
     if (arg.type === 'Literal') {
       if (length <= ++index || typeof arg.value !== 'string') return false
+      name = arg
       arg = args[index]
     }
     if (arg.type === 'ArrayExpression') {
@@ -36,14 +38,14 @@ function detectDefineOrRequireCall(expr) {
       arg = args[index]
     }
     return (arg.type === 'FunctionExpression' || arg.type === 'ObjectExpression') &&
-      { deps }
+      { namespace, func, name, deps }
   }
 
   // require([deps], success, error)
   if (func.name === 'require') {
     const deps = args[0]
     return deps.type === 'ArrayExpression' && length >= 2 &&
-      args[1].type === 'FunctionExpression' && { deps }
+      args[1].type === 'FunctionExpression' && { func, deps }
   }
 }
 
