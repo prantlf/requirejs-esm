@@ -1,5 +1,5 @@
 import { detectDefinesOrRequires, updateAmdDeps } from './amd'
-import { transformEsmToAmd } from './esm'
+import { detectImportsAndExports, transformEsmToAmd } from './esm'
 
 export function transformAst(program, options = {}) {
   const amds = detectDefinesOrRequires(program)
@@ -19,4 +19,4 @@ export function transformAst(program, options = {}) {
   return result
 }
 
-export { detectDefinesOrRequires }
+export { detectDefinesOrRequires, detectImportsAndExports }

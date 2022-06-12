@@ -1,16 +1,46 @@
 const { readdir, readFile } = require('fs/promises')
 const { join, relative } = require('path')
-const { equal } = require('assert')
+const { ok, equal } = require('assert')
 const tehanu = require('tehanu')
-const test = tehanu('esm')
+const { parseModule } = require('meriyah')
+const { generate } = require('astring')
 const { load, write } = require('../dist/plugin')
-const { transform } = require('../dist/api')
+const { transform, transformAst, resolvePath, detectDefinesOrRequires, detectImportsAndExports } = require('../dist/api')
 const { req, config, onload } = require('./mock')
+
+const test = tehanu('esm')
 
 test('transform with sourcemap', function () {
   const code = transform('import A from "name"', 'test.js', { sourceMap: true }).code
   equal(code, `define(["esm!name"], function (A) {});
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`)
+})
+
+test('transformAst works', function () {
+  let ast = parseModule('import A from "name"', { next: true })
+  const { updated } = transformAst(ast, { sourceFileName: 'test.js', pluginName: 'esm', resolvePath })
+  ok(updated)
+  const code = generate(ast)
+  equal(code, `define(["esm!name"], function (A) {});
+`)
+})
+
+test('detectDefinesOrRequires works', function () {
+  let ast = parseModule('my.define("main", ["name"], A => {})', { next: true })
+  const modules = detectDefinesOrRequires(ast)
+  equal(modules.length, 1)
+  const { namespace, func, name, deps } = modules[0]
+  ok(namespace)
+  ok(func)
+  ok(name)
+  ok(deps)
+})
+
+test('detectImportsAndExports works', function () {
+  let ast = parseModule('import A from "name"', { next: true })
+  const { imports, exports } = detectImportsAndExports(ast)
+  equal(imports.length, 1)
+  equal(exports.length, 0)
 })
 
 async function pluginLoad(input) {
