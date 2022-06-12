@@ -35,7 +35,7 @@ Reference ESM source files files via the `esm!` plugin prefix:
 ```javascript
 define(['esm!your-esm-module'], function (module) {
   // ...
-});
+})
 ```
 
 You can use the ESM module format in modules loaded by the `esm!` plugin including the keyword `import` for loading nested dependencies. The plugin `esm!` has to be used only in the topmost `require` or `define` statement.

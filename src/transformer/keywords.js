@@ -54,7 +54,7 @@ const reservedWordsStrictSet = new Set(reservedWords.strict)
 const reservedWordsStrictBindSet = new Set(reservedWords.strictBind)
 
 export function isReservedWord(word, inModule) {
-  return inModule && word === 'await' || word === 'enum';
+  return inModule && word === 'await' || word === 'enum'
 }
 
 export function isStrictReservedWord(word, inModule) {
