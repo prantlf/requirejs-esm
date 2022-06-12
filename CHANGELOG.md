@@ -1,3 +1,18 @@
+# [2.2.0](https://github.com/prantlf/requirejs-esm/compare/v2.1.0...v2.2.0) (2022-06-12)
+
+
+### Bug Fixes
+
+* Support arrow function expressions as module callbacks ([14df771](https://github.com/prantlf/requirejs-esm/commit/14df7715382ef1d2c6a257eafaf2649cc4d8b378))
+* Upgrade dependencies ([bfd810b](https://github.com/prantlf/requirejs-esm/commit/bfd810b7e37df630e440c4b253429a93f92eaee6))
+
+
+### Features
+
+* Export detectDefinesOrRequires to allow analysing AMD modules ([fa7e8cb](https://github.com/prantlf/requirejs-esm/commit/fa7e8cbff8137fa9ae25b3b42b76e6bf7d43e29a))
+* Export detectImportsAndExports to analysis of ESM modules ([84511d2](https://github.com/prantlf/requirejs-esm/commit/84511d211580c7bf569e7f309ca68b588936a006))
+* Export transformAst to allow work on the level of AST ([0928227](https://github.com/prantlf/requirejs-esm/commit/0928227d03956efa7dceb7c89891cff0f874b6a0))
+
 # [2.1.0](https://github.com/prantlf/requirejs-esm/compare/v2.0.1...v2.1.0) (2022-04-09)
 
 
