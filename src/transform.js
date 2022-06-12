@@ -19,9 +19,8 @@ export default function transform(text, file, {
   let ast = parseModule(text, { next: true, loc: true })
 
   const options = { sourceFileName: file, pluginName, resolvePath, originalResolvePath }
-  transformModules(ast, options)
+  const { updated } = transformModules(ast, options)
 
-  const { updated } = options
   let code, map
   if (updated) {
     if (sourceMap === true) {

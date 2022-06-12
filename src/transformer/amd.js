@@ -36,14 +36,14 @@ function detectDefineOrRequireCall(expr) {
       arg = args[index]
     }
     return (arg.type === 'FunctionExpression' || arg.type === 'ObjectExpression') &&
-      { deps: deps }
+      { deps }
   }
 
   // require([deps], success, error)
   if (func.name === 'require') {
     const deps = args[0]
     return deps.type === 'ArrayExpression' && length >= 2 &&
-      args[1].type === 'FunctionExpression' && { deps: deps }
+      args[1].type === 'FunctionExpression' && { deps }
   }
 }
 

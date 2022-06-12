@@ -12,3 +12,5 @@ type ResolvePath = ((sourcePath: string, currentFile: string, options?: ResolveO
 declare function transform(contents: string, path: string, options?: {
   pluginName?: string /*= 'esm'' */, resolvePath?: ResolvePath,
   sourceMap?: boolean /*= true */ }): string
+
+declare function transformAst(ast: object): { amd?: true, updated?: true }
