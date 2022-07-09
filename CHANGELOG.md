@@ -1,3 +1,10 @@
+## [2.2.1](https://github.com/prantlf/requirejs-esm/compare/v2.2.0...v2.2.1) (2022-07-09)
+
+
+### Bug Fixes
+
+* Add AMD callback to the detected object ([2d09176](https://github.com/prantlf/requirejs-esm/commit/2d09176c95f6ee097bbed928348d4402a3662f46))
+
 # [2.2.0](https://github.com/prantlf/requirejs-esm/compare/v2.1.0...v2.2.0) (2022-06-12)
 
 
