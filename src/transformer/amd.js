@@ -37,16 +37,21 @@ function detectDefineOrRequireCall(expr) {
       if (length <= ++index) return false
       arg = args[index]
     }
-    return (arg.type === 'FunctionExpression' ||
-      arg.type === 'ArrowFunctionExpression' ||
-      arg.type === 'ObjectExpression') && { namespace, func, name, deps }
+    if (arg.type === 'FunctionExpression' || arg.type === 'ArrowFunctionExpression') {
+      return { namespace, func, name, deps, factory: arg }
+    }
+    return arg.type === 'ObjectExpression' && { namespace, func, name, deps, output: arg }
   }
 
   // require([deps], success, error)
   if (func.name === 'require') {
     const deps = args[0]
-    return deps.type === 'ArrayExpression' && length >= 2 &&
-      args[1].type === 'FunctionExpression' && { func, deps }
+    if (deps.type === 'ArrayExpression' && length >= 2) {
+      const body = args[1]
+      if (body.type === 'FunctionExpression' || body.type === 'ArrowFunctionExpression') {
+        return { func, deps, body }
+      }
+    }
   }
 }
 

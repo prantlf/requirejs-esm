@@ -20,6 +20,9 @@ declare function detectDefinesOrRequires(ast: object): {
   func: object
   name?: object
   deps?: object[]
+  factory?: object
+  output?: object
+  body?: object
 }[]
 
 declare function detectImportsAndExports(ast: object): {
