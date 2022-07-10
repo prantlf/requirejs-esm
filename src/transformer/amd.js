@@ -26,7 +26,7 @@ function detectDefineOrRequireCall(expr) {
   if (func.name === 'define') {
     let index = 0
     let arg = args[index]
-    let name, deps
+    let name, deps, params
     if (arg.type === 'Literal') {
       if (length <= ++index || typeof arg.value !== 'string') return false
       name = arg
@@ -38,20 +38,90 @@ function detectDefineOrRequireCall(expr) {
       arg = args[index]
     }
     if (arg.type === 'FunctionExpression' || arg.type === 'ArrowFunctionExpression') {
-      return { namespace, func, name, deps, factory: arg }
+      if (!deps) {
+        ({ params, deps } = detectCjsDeps(arg) || {})
+      } else {
+        params = arg.params
+      }
+      return { namespace, func, name, deps, params, factory: arg }
     }
     return arg.type === 'ObjectExpression' && { namespace, func, name, deps, output: arg }
   }
 
-  // require([deps], success, error)
+  // require([deps], success, [error])
   if (func.name === 'require') {
-    const deps = args[0]
-    if (deps.type === 'ArrayExpression' && length >= 2) {
+    const arg = args[0]
+    if (arg.type === 'ArrayExpression') {
+      if (length < 2) return false
       const body = args[1]
       if (body.type === 'FunctionExpression' || body.type === 'ArrowFunctionExpression') {
-        return { func, deps, body }
+        return { func, deps: arg, params: body.params, body }
+      }
+    } else if (arg.type === 'FunctionExpression' || arg.type === 'ArrowFunctionExpression') {
+      const { params, deps } = detectCjsDeps(arg) || {}
+      return { func, params, deps, body: arg }
+    }
+  }
+}
+
+// Checks if the expression parameters can support CJS-like require calls
+// in the expression body.
+function isCjsExpression(expr) {
+  const { params } = expr;
+  if (!params.length) return false
+  const param = params[0]
+  return param.type === 'Identifier' && param.name === 'require'
+}
+
+// Detects variable declarations with CJS-like require calls and such require
+// calls on the first level of the expression body.
+function detectCjsDeps(expr) {
+  if (!isCjsExpression(expr)) return
+  const params = []
+  const namedDeps = []
+  const unnamedDeps = []
+  for (const statement of expr.body.body || []) {
+    const { type } = statement
+    if (type === 'VariableDeclaration') {
+      for (const declarator of statement.declarations) {
+        const { id } = declarator
+        if (id && id.type === 'Identifier') {
+          const { init } = declarator
+          if (init && init.type === 'CallExpression') {
+            const { callee } = init
+            if (callee.type === 'Identifier' && callee.name === 'require') {
+              const { arguments: args } = init
+              if (args.length === 1) {
+                const arg = args[0]
+                if (arg.type === 'Literal') {
+                  params.push(id)
+                  namedDeps.push(arg)
+                }
+              }
+            }
+          }
+        }
+      }
+    } else if (type === 'ExpressionStatement') {
+      const { expression } = statement
+      if (expression.type === 'CallExpression') {
+        const { callee } = expression
+        if (callee.type === 'Identifier' && callee.name === 'require') {
+          const { arguments: args } = expression
+          if (args.length === 1) {
+            const arg = args[0]
+            if (arg.type === 'Literal') {
+              unnamedDeps.push(arg)
+            }
+          }
+        }
       }
     }
+  }
+  let deps = [...namedDeps, ...unnamedDeps]
+  if (deps.length) {
+    deps = { type: 'ArrayExpression', elements: deps }
+    return { params, deps }
   }
 }
 

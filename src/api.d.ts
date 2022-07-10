@@ -19,7 +19,8 @@ declare function detectDefinesOrRequires(ast: object): {
   namespace?: object
   func: object
   name?: object
-  deps?: object[]
+  deps?: object
+  params?: object[]
   factory?: object
   output?: object
   body?: object

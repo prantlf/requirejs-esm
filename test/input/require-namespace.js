@@ -1,1 +1,1 @@
-my.require(['name'], function () {});
+my.require(['name'], function () {})
