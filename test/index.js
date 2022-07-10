@@ -96,7 +96,9 @@ ${actual}`)
 async function testPluginAll() {
   const dir = relative(process.cwd(), join(__dirname, 'input'))
   const inputs = await readdir(dir)
+  const filter = process.env.TEST_INPUT
   for (const input of inputs) {
+    if (filter && input !== filter) continue
     test(input, () => testPluginSingle(input))
   }
   await tehanu.schedule()
