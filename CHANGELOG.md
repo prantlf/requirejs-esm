@@ -1,3 +1,10 @@
+# [2.3.0](https://github.com/prantlf/requirejs-esm/compare/v2.2.1...v2.3.0) (2022-07-10)
+
+
+### Features
+
+* Support callback bodies with CJS-like dependencies ([7ee73cd](https://github.com/prantlf/requirejs-esm/commit/7ee73cd47e3a1d64dfd7452cbdc4d22b67bbb331))
+
 ## [2.2.1](https://github.com/prantlf/requirejs-esm/compare/v2.2.0...v2.2.1) (2022-07-09)
 
 
