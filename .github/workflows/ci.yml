@@ -23,6 +23,8 @@ jobs:
           - args: [--frozen-lockfile, --no-verify-store-integrity, --no-optional]
     - name: Test
       run: npm test
+    - name: Coverage
+      uses: codecov/codecov-action@v2
     - name: Publish
       uses: cycjimmy/semantic-release-action@v2
       with:
