@@ -1,3 +1,9 @@
+## [2.4.0](https://github.com/prantlf/requirejs-esm/compare/v2.3.1...v2.4.0) (2024-07-26)
+
+### Features
+
+* Support export {default} {A as default} and {default as A} from module ([1a48783](https://github.com/prantlf/requirejs-esm/commit/1a48783362e56a86608683777b512e3d51d6aa3b))
+
 ## [2.3.1](https://github.com/prantlf/requirejs-esm/compare/v2.3.0...v2.3.1) (2023-05-05)
 
 
