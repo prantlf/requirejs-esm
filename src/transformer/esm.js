@@ -93,6 +93,7 @@ export function transformEsmToAmd(program, options) {
   let hasExport = false
   let needReturnExport = false
   let isOnlyDefaultExport = true
+  let defaultExportVar
 
   for (let i = 0; i < length; ++i) {
     const statement = body[i]
@@ -188,6 +189,7 @@ export function transformEsmToAmd(program, options) {
     // export var a = 1
     // export function test() {}
     // export class Test {}
+    // export {default as A} from "module"
     if (statement.type === 'ExportNamedDeclaration') {
       hasExport = true
       needReturnExport = true
@@ -246,13 +248,45 @@ export function transformEsmToAmd(program, options) {
               addExportStatement({ exported, local: identifier(localName) })
             } else {
               localName = name
-              addExportStatement(specifier)
+              if (localName === 'default') {
+                if (exported.name === 'default') {
+                  // export {default} from "module"
+                  defaultExportVar = importVar
+                } else {
+                  // export {default as A} from "module"
+                  addExportDefaultStatement(exported, importVar)
+                }
+              } else if (exported.name === 'default') {
+                // export {A as default} from "module"
+                defaultExportVar = importVar
+              } else {
+                // export {A as B} from "module"
+                addExportStatement(specifier)
+              }
             }
-            namedImports.push(declareImport(localName, importVar.name, name))
+            if (localName !== 'default' && !defaultExportVar) {
+              // _exports.B = A;
+              namedImports.push(declareImport(localName, importVar.name, name))
+            }
           }
         } else {
           for (const specifier of specifiers) {
-            addExportStatement(specifier)
+            const { exported, local } = specifier
+            if (local.name === 'default') {
+              if (exported.name === 'default') {
+                // export {default}
+                throw new Error('Expression `export { default }` is not supported.')
+              } else {
+                // export {default as A}
+                throw new Error(`Expression \`export { default as ${exported.name} }\` is not supported.`)
+              }
+            } else if (exported.name === 'default') {
+              // export {A as default}
+              defaultExportVar = local
+            } else {
+              // export {A as B}
+              addExportStatement(specifier)
+            }
           }
         }
 
@@ -280,22 +314,27 @@ export function transformEsmToAmd(program, options) {
 
   // adding define wrapper
   if (hasExport && needReturnExport) {
-    // var _exports = {}
-    body.unshift(
-      variableDeclaration('let', [
-        variableDeclarator(exportsVar, objectExpression([]))
-      ])
-    )
-
-    // return <expression>
     let returnStat
-    if (isOnlyDefaultExport) {
-      // return _exports.default
-      returnStat = returnStatement(memberExpression(exportsVar, identifier('default')))
-    }
-    else {
-      // return _exports
-      returnStat = returnStatement(exportsVar)
+    if (defaultExportVar) {
+      // return _import
+      returnStat = returnStatement(defaultExportVar)
+    } else {
+      // var _exports = {}
+      body.unshift(
+        variableDeclaration('let', [
+          variableDeclarator(exportsVar, objectExpression([]))
+        ])
+      )
+
+      // return <expression>
+      if (isOnlyDefaultExport) {
+        // return _exports.default
+        returnStat = returnStatement(memberExpression(exportsVar, identifier('default')))
+      }
+      else {
+        // return _exports
+        returnStat = returnStatement(exportsVar)
+      }
     }
 
     body.push(returnStat)
@@ -309,6 +348,15 @@ export function transformEsmToAmd(program, options) {
       isOnlyDefaultExport = false
     }
     const exportStat = exportStatement(exportsVar, asName, local)
+    body.push(exportStat)
+  }
+
+  function addExportDefaultStatement(exported, imported) {
+    const asName = exported.name
+    if (asName !== 'default') {
+      isOnlyDefaultExport = false
+    }
+    const exportStat = exportStatement(exportsVar, asName, imported)
     body.push(exportStat)
   }
 }

@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 
 // Require module dependencies.
-const commander = require('commander')
+const { Command } = require('commander')
 const glob = require('tiny-glob')
 const { readFile, writeFile } = require('fs/promises')
 const { transform } = require('../dist/api')
 
 // Define the command-line interface.
-commander.description('Transforms an ESM module to AMD or adapts an AMD module for requirejs-esm.')
+const program = new Command()
+program.description('Transforms an ESM module to AMD or adapts an AMD module for requirejs-esm.')
   .name('esm2requirejs')
   .usage('[options] <files>')
   // .option('-e, --ecma <version>', 'change the ECMAScript version from 2020 to other one')
@@ -36,10 +37,10 @@ const {
   output: outputFile,
   rewrite,
   verbose
-} = commander.opts()
-const { args } = commander
+} = program.opts()
+const { args } = program
 if (!args.length) {
-  commander.help()
+  program.help()
 }
 
 // Main entry point.

@@ -80,7 +80,7 @@ test('use plugin', async function () {
   await pluginWrite(input)
 })
 
-async function testPluginSingle(input) {
+async function testPluginValidSingle(input) {
   const content = await readFile(join(__dirname, 'input', input), 'utf8')
   const name = input === 'amd-relative.js' ? `test/input/${input}` : input
   const actual = transform(content, name).code.trimEnd()
@@ -93,14 +93,53 @@ ${actual}`)
   }
 }
 
-async function testPluginAll() {
+function firstLineComment(text) {
+  const cr = text.indexOf('\r')
+  const lf = text.indexOf('\n')
+  const eoln = cr < lf ? cr < 0 ? lf : cr : lf
+  if (eoln < 0) throw new Error('First line with comment missing.')
+  return text.slice(3, eoln)
+}
+
+async function testPluginInvalidSingle(name) {
+  const content = await readFile(join(__dirname, 'invalid', name), 'utf8')
+  const message = firstLineComment(content)
+  try {
+    transform(content, name).code.trimEnd()
+    throw new Error(`missing error: "${message}"`)
+  } catch (err) {
+    if (err.message !== message) {
+      throw new Error(`expected error !== actual error
+  
+  "${message}"
+  "${err.message}"`)
+    }
+  }
+}
+
+async function testPluginValid() {
   const dir = relative(process.cwd(), join(__dirname, 'input'))
   const inputs = await readdir(dir)
   const filter = process.env.TEST_INPUT
   for (const input of inputs) {
     if (filter && input !== filter) continue
-    test(input, () => testPluginSingle(input))
+    test(input, () => testPluginValidSingle(input))
   }
+}
+
+async function testPluginInvalid() {
+  const dir = relative(process.cwd(), join(__dirname, 'invalid'))
+  const inputs = await readdir(dir)
+  const filter = process.env.TEST_INPUT
+  for (const input of inputs) {
+    if (filter && input !== filter) continue
+    test(input, () => testPluginInvalidSingle(input))
+  }
+}
+
+async function testPluginAll() {
+  await testPluginValid()
+  await testPluginInvalid()
   await tehanu.schedule()
 }
 
