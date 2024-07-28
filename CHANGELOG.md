@@ -1,3 +1,5 @@
+# Changes
+
 ## [2.4.0](https://github.com/prantlf/requirejs-esm/compare/v2.3.1...v2.4.0) (2024-07-26)
 
 ### Features
@@ -6,13 +8,11 @@
 
 ## [2.3.1](https://github.com/prantlf/requirejs-esm/compare/v2.3.0...v2.3.1) (2023-05-05)
 
-
 ### Bug Fixes
 
 * Upgrade dependencies ([1037b59](https://github.com/prantlf/requirejs-esm/commit/1037b5984e7ae75c839ad2da0a6bd6db4d7d3245))
 
-# [2.3.0](https://github.com/prantlf/requirejs-esm/compare/v2.2.1...v2.3.0) (2022-07-10)
-
+## [2.3.0](https://github.com/prantlf/requirejs-esm/compare/v2.2.1...v2.3.0) (2022-07-10)
 
 ### Features
 
@@ -20,19 +20,16 @@
 
 ## [2.2.1](https://github.com/prantlf/requirejs-esm/compare/v2.2.0...v2.2.1) (2022-07-09)
 
-
 ### Bug Fixes
 
 * Add AMD callback to the detected object ([2d09176](https://github.com/prantlf/requirejs-esm/commit/2d09176c95f6ee097bbed928348d4402a3662f46))
 
-# [2.2.0](https://github.com/prantlf/requirejs-esm/compare/v2.1.0...v2.2.0) (2022-06-12)
-
+## [2.2.0](https://github.com/prantlf/requirejs-esm/compare/v2.1.0...v2.2.0) (2022-06-12)
 
 ### Bug Fixes
 
 * Support arrow function expressions as module callbacks ([14df771](https://github.com/prantlf/requirejs-esm/commit/14df7715382ef1d2c6a257eafaf2649cc4d8b378))
 * Upgrade dependencies ([bfd810b](https://github.com/prantlf/requirejs-esm/commit/bfd810b7e37df630e440c4b253429a93f92eaee6))
-
 
 ### Features
 
@@ -40,8 +37,7 @@
 * Export detectImportsAndExports to analysis of ESM modules ([84511d2](https://github.com/prantlf/requirejs-esm/commit/84511d211580c7bf569e7f309ca68b588936a006))
 * Export transformAst to allow work on the level of AST ([0928227](https://github.com/prantlf/requirejs-esm/commit/0928227d03956efa7dceb7c89891cff0f874b6a0))
 
-# [2.1.0](https://github.com/prantlf/requirejs-esm/compare/v2.0.1...v2.1.0) (2022-04-09)
-
+## [2.1.0](https://github.com/prantlf/requirejs-esm/compare/v2.0.1...v2.1.0) (2022-04-09)
 
 ### Features
 
@@ -49,19 +45,16 @@
 
 ## [2.0.1](https://github.com/prantlf/requirejs-esm/compare/v2.0.0...v2.0.1) (2022-04-08)
 
-
 ### Bug Fixes
 
 * Allow esnext code ([fb69de9](https://github.com/prantlf/requirejs-esm/commit/fb69de9cd00672655213d5beffe4a6dc92d41949))
 * Update the testing command-line tool after the API change ([23b6d7f](https://github.com/prantlf/requirejs-esm/commit/23b6d7f80fb49fa1a7eb74c451cb46ef4d4e059a))
 
-# [2.0.0](https://github.com/prantlf/requirejs-esm/compare/v1.1.0...v2.0.0) (2022-04-04)
-
+## [2.0.0](https://github.com/prantlf/requirejs-esm/compare/v1.1.0...v2.0.0) (2022-04-04)
 
 ### Bug Fixes
 
 * Mark `dist/api` as the main module instead of `dist/plugin` ([ddbaefa](https://github.com/prantlf/requirejs-esm/commit/ddbaefa68d1a649a0b3aa0862fe66fd9ce3a67d4))
-
 
 ### BREAKING CHANGES
 
@@ -72,8 +65,7 @@ to be consumed. If you did import the plugin, use the full path
 `requirejs-esm/dist/plugin`, just like it was used in the RequireJS
 configuration of the `esm` path alias.
 
-# [1.1.0](https://github.com/prantlf/requirejs-esm/compare/v1.0.2...v1.1.0) (2022-04-04)
-
+## [1.1.0](https://github.com/prantlf/requirejs-esm/compare/v1.0.2...v1.1.0) (2022-04-04)
 
 ### Features
 
@@ -81,20 +73,17 @@ configuration of the `esm` path alias.
 
 ## [1.0.2](https://github.com/prantlf/requirejs-esm/compare/v1.0.1...v1.0.2) (2022-04-04)
 
-
 ### Bug Fixes
 
 * Do not install dependencies for performance measuring at the consumer ([a460fc4](https://github.com/prantlf/requirejs-esm/commit/a460fc4f573065d72ed6ed8e9fd88ce8948af187))
 
 ## [1.0.1](https://github.com/prantlf/requirejs-esm/compare/v1.0.0...v1.0.1) (2022-02-17)
 
-
 ### Bug Fixes
 
 * Do not transpile modules loaded from a bundle ([18c47d4](https://github.com/prantlf/requirejs-esm/commit/18c47d4658d5f76e614302193d2a114b84ff3545))
 
 # 1.0.0 (2022-02-16)
-
 
 ### Features
 
