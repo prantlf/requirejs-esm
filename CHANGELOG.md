@@ -6,6 +6,12 @@
 
 * Re-release 2.4.0 as 3.0.0 because of a breaking change ([05184cc](https://github.com/prantlf/requirejs-esm/commit/05184ccafd41c4f50396adcbdc65125f3ad1e46a))
 
+## [2.4.2](https://github.com/prantlf/requirejs-esm/compare/v2.4.1...v2.4.2) (2024-08-06)
+
+### Bug Fixes
+
+* Publish the same build output from 2.3.1 ([81d0d4e](https://github.com/prantlf/requirejs-esm/commit/81d0d4efd6c3085c7be31c313fc7954e87c8c9da))
+
 ## [2.4.1](https://github.com/prantlf/requirejs-esm/compare/v2.3.1...v2.4.1) (2024-08-06)
 
 ### Bug Fixes
