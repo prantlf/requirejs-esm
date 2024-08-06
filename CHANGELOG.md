@@ -6,6 +6,10 @@
 
 * Re-release 2.4.0 as 3.0.0 because of a breaking change ([05184cc](https://github.com/prantlf/requirejs-esm/commit/05184ccafd41c4f50396adcbdc65125f3ad1e46a))
 
+### BREAKING CHANGES
+
+The minimum version of Node.js is 18 from now on.
+
 ## [2.4.2](https://github.com/prantlf/requirejs-esm/compare/v2.4.1...v2.4.2) (2024-08-06)
 
 ### Bug Fixes
