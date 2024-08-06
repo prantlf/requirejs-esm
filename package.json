@@ -1,6 +1,6 @@
 {
   "name": "requirejs-esm",
-  "version": "2.4.0",
+  "version": "3.0.0",
   "description": "A RequireJS plugin converting JavaScript modules from ESM to AMD.",
   "author": "Ferdinand Prantl <prantlf@gmail.com>",
   "license": "MIT",
@@ -19,7 +19,7 @@
     "url": "https://github.com/prantlf/requirejs-esm/issues"
   },
   "engines": {
-    "node": ">=14"
+    "node": ">=18"
   },
   "main": "dist/api.js",
   "module": "src/api.js",
