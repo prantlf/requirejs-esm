@@ -1,5 +1,11 @@
 # Changes
 
+## [3.1.0](https://github.com/prantlf/requirejs-esm/compare/v3.0.0...v3.1.0) (2025-05-14)
+
+### Features
+
+* Upgrade dependencies ([c024928](https://github.com/prantlf/requirejs-esm/commit/c024928dfae0b08b6121c4909798666490f606ac))
+
 ## [3.0.0](https://github.com/prantlf/requirejs-esm/compare/v2.4.0...v3.0.0) (2024-08-06)
 
 ### Bug Fixes
