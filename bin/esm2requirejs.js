@@ -17,6 +17,7 @@ program.description('Transforms an ESM module to AMD or adapts an AMD module for
   .option('-r, --rewrite', 'rewrite the input files with the adapted output')
   .option('-s, --source-map', 'write inline source maps to the adapted output')
   .option('-v, --verbose', 'print progress and call stack in case of error')
+  .argument('[files...]')
   .on('--help', function () {
     console.log()
     console.log('You can use one or more file names or one or more glob patterns to specify one')
