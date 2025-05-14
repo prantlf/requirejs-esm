@@ -37,8 +37,8 @@ importers:
         specifier: ^9.26.0
         version: 9.26.0
       '@prantlf/requirejs':
-        specifier: ^3.3.0
-        version: 3.3.0
+        specifier: ^3.3.1
+        version: 3.3.1
       '@rollup/plugin-commonjs':
         specifier: ^28.0.3
         version: 28.0.3(rollup@4.40.2)
@@ -180,8 +180,8 @@ packages:
   '@prantlf/convert-source-map@2.1.0':
     resolution: {integrity: sha512-xxOdgYEEBUv4hGPMqsp+cb774fVz+0WO/3TTLqp3TFYpd1NtPMFtveKG0S/dCitT6uu6DnueW+xDKD0hmQjwCg==}
 
-  '@prantlf/requirejs@3.3.0':
-    resolution: {integrity: sha512-UdV+R+AimVBK6UGrcPrGqGPG00usPaQeDaXFh4KcL6BO+pDBlfpNFaKhfDRvbfyGE09GmZaAUqr68B/jmaTfXw==}
+  '@prantlf/requirejs@3.3.1':
+    resolution: {integrity: sha512-tW7fgnzBGNBquI1MAs5hFh6+ECDoeVNgAw6/kFfys/seyDNDFVK1uMu6MOwfKsiqDD8C0x4Hddczg7gtEWns/A==}
     engines: {node: '>=0.4.0'}
     hasBin: true
 
@@ -1335,7 +1335,7 @@ snapshots:
 
   '@prantlf/convert-source-map@2.1.0': {}
 
-  '@prantlf/requirejs@3.3.0': {}
+  '@prantlf/requirejs@3.3.1': {}
 
   '@rollup/plugin-commonjs@28.0.3(rollup@4.40.2)':
     dependencies:
