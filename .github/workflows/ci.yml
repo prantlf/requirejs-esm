@@ -19,7 +19,10 @@ jobs:
         cache: 'pnpm'
     - run: pnpm i --frozen-lockfile --no-verify-store-integrity
     - run: npm test
-    - uses: codecov/codecov-action@v3
+    - uses: codecov/codecov-action@v4
+      if: ${{ github.ref_name == 'master' }}
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
     - uses: prantlf/publish-release-action@v1
       with:
         no-archives: true
