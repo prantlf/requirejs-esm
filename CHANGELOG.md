@@ -1,5 +1,16 @@
 # Changes
 
+## [4.0.0](https://github.com/prantlf/requirejs-esm/compare/v3.1.1...v4.0.0) (2025-11-09)
+
+### Features
+
+* Upgrade dependencies ([82c8cf1](https://github.com/prantlf/requirejs-esm/commit/82c8cf1b7217957cd2aaf297d1687e52f71072fa))
+* Insert "use strict" to output AMD code by default ([dc9cfc5](https://github.com/prantlf/requirejs-esm/commit/dc9cfc531b8518baed9a40ad5e4a66f9c48271fc))
+
+### BREAKING CHANGES
+
+Do not insert `"use strict"` expression to the AMD modules. You'd set it to `false` if your bundler inserts `"use strict"` to the outer scope.
+
 ## [3.1.1](https://github.com/prantlf/requirejs-esm/compare/v3.1.0...v3.1.1) (2025-05-14)
 
 ### Bug Fixes
