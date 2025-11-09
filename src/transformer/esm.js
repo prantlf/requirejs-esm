@@ -2,7 +2,8 @@ import { isAnonymousImport, isImportDefault, isImportAllAs } from './validators'
 import {
   identifier, memberExpression, objectExpression, arrayExpression, blockStatement,
   variableDeclaration, variableDeclarator, returnStatement, expressionStatement,
-  forInStatement, assignmentExpression, callExpression, functionExpression
+  forInStatement, assignmentExpression, callExpression, functionExpression,
+  literal
 } from './factories'
 import { toExpression, replaceLiteral, exportStatement } from './converters'
 import { generateUid, generateUidIdentifier } from './generate-id'
@@ -385,13 +386,22 @@ function exportCopyLoop(exportsVar, importVar) {
 
 // Wraps a program body of statements into an AMD module.
 function buildAmdModule(program, options, importPaths, importVars, namedImports) {
+  const body = []
+  if (options.useStrict !== false) {
+    body.push(expressionStatement(literal('use strict')))
+  }
+  if (namedImports.length) {
+    body.push(...namedImports)
+  }
+  body.push(...program.body)
+  const bodyStatement = blockStatement(body)
   program.body = [
     expressionStatement(callExpression(
       identifier('define'), importPaths.length ? [
         prepareImportPaths(importPaths, options),
-        functionExpression(importVars, blockStatement(namedImports.concat(program.body)))
+        functionExpression(importVars, bodyStatement)
       ] : [
-        functionExpression([], blockStatement(program.body))
+        functionExpression([], bodyStatement)
       ]))
   ]
 }

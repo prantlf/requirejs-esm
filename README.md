@@ -123,6 +123,9 @@ The `esm` plugin supports configuration with the following defaults:
     mixedAmdAndEsm: false,
     // Suppress transpiling even if an optimized module has not been loaded yet.
     onlyAmd: false,
+    // Do not insert `"use strict"` expression to the AMD modules. You'd set it
+    // to `false` if your bundler inserts `"use strict"` to the outer scope.
+    useStrict: true,
     // Enable source maps, can be an object with booleans { inline, content }.
     // If set to true, the object will be set to { inline: true, content: true }.
     sourceMap: false,
@@ -151,6 +154,9 @@ The `transform` method supports a subset of plugin options:
   resolvePath: func,
   // Allow using a different plugin alias than `esm` in the source code.
   pluginName: 'esm',
+  // Do not insert `"use strict"` expression to the AMD code output. You'd set
+  // it to `false` if your bundler inserts `"use strict"` to the outer scope.
+  useStrict: true,
   // Enable source maps, can be an object with booleans { inline, content }.
   // If set to true, the object will be set to { inline: true, content: true }.
   sourceMap: false

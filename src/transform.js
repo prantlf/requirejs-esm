@@ -13,12 +13,17 @@ export default function transform(text, file, {
   // name with `esm!`, above all.
   resolvePath = originalResolvePath,
   // ecmaVersion = 2020,
+  // Do not insert `"use strict"` expression to the AMD modules. You'd set it
+  // to `false` if your bundler inserts `"use strict"` to the outer scope.
+  useStrict,
+  // Enable source maps, can be an object with booleans { inline, content }.
+  // If set to true, the object will be set to { inline: true, content: true }.
   sourceMap
 } = {}) {
   // const ast = parse(text, { ecmaVersion, sourceType: 'module', locations: true })
   let ast = parseModule(text, { next: true, loc: true })
 
-  const options = { sourceFileName: file, pluginName, resolvePath, originalResolvePath }
+  const options = { sourceFileName: file, pluginName, resolvePath, originalResolvePath, useStrict }
   const { updated } = transformAst(ast, options)
 
   let code, map

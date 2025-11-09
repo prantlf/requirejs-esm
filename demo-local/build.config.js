@@ -14,7 +14,8 @@
 
   config: {
     esm: {
-      sourceMap: true
+      sourceMap: true,
+      useStrict: false
     }
   },
 

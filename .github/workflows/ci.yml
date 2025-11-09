@@ -30,8 +30,8 @@ jobs:
         registry-url: 'https://registry.npmjs.org'
         cache: 'pnpm'
     - run: pnpm i --frozen-lockfile --no-verify-store-integrity
-    - run: npm build
-    - run: npm demo
+    - run: npm run build
+    - run: npm run demo
     - run: npm test
     - uses: codecov/codecov-action@v4
       if: ${{ github.ref_name == 'master' }}

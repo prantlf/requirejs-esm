@@ -9,11 +9,19 @@ declare function resolvePath(sourcePath: string, currentFile: string, options?: 
 
 type ResolvePath = ((sourcePath: string, currentFile: string, options?: ResolveOptions) => string) | false
 
-declare function transform(contents: string, path: string, options?: {
-  pluginName?: string /*= 'esm'' */, resolvePath?: ResolvePath,
-  sourceMap?: boolean /*= true */ }): string
+interface TransformAstOptions {
+  pluginName?: string /*= 'esm'' */
+  resolvePath?: ResolvePath
+  useStrict?: boolean /*= true */
+}
 
-declare function transformAst(ast: object): { amd?: true, updated?: true }
+interface TransformOptions extends TransformAstOptions {
+  sourceMap?: boolean /*= true */
+}
+
+declare function transform(contents: string, path: string, options?: TransformOptions): string
+
+declare function transformAst(ast: object, options?: TransformOptions): { amd?: true, updated?: true }
 
 declare function detectDefinesOrRequires(ast: object): {
   namespace?: object

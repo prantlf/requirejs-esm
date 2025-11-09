@@ -11,14 +11,14 @@ const { req, config, onload } = require('./mock')
 const test = tehanu('esm')
 
 test('transform with sourcemap', function () {
-  const code = transform('import A from "name"', 'test.js', { sourceMap: true }).code
+  const code = transform('import A from "name"', 'test.js', { useStrict: false, sourceMap: true }).code
   equal(code, `define(["esm!name"], function (A) {});
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`)
 })
 
 test('transformAst works', function () {
   let ast = parseModule('import A from "name"', { next: true })
-  const { updated } = transformAst(ast, { sourceFileName: 'test.js', pluginName: 'esm', resolvePath })
+  const { updated } = transformAst(ast, { sourceFileName: 'test.js', pluginName: 'esm', resolvePath, useStrict: false })
   ok(updated)
   const code = generate(ast)
   equal(code, `define(["esm!name"], function (A) {});
@@ -46,9 +46,9 @@ test('detectImportsAndExports works', function () {
 async function pluginLoad(input) {
   const dir = relative(process.cwd(), __dirname)
   onload.init()
-  load(join(dir, 'input', input), req, onload, config)
+  load(join(dir, 'input', `${input}.js`), req, onload, config)
   const actual = await onload.promise
-  const expected = await readFile(join(dir, 'output', input), 'utf8')
+  const expected = await readFile(join(dir, 'output', `${input}-strict.js`), 'utf8')
   if (expected !== actual) {
     console.log()
     throw new Error(`expected !== actual
@@ -61,6 +61,7 @@ ${actual}`)
 async function pluginWrite(input) {
   const names = []
   const codes = []
+  input = `${input}.js`
   write('esm', `test/input/${input}`, {
     asModule: (name, code) => {
       names.push(name)
@@ -70,12 +71,12 @@ async function pluginWrite(input) {
   equal(names.length, 2)
   equal(names[0], `test/input/${input}`)
   equal(names[1], `esm!test/input/${input}`)
-  equal(codes[0], 'define(function () {\n  let _exports = {};\n  let A, B;\n  _exports.A = A;\n  _exports.B = B;\n  return _exports;\n});\n')
+  equal(codes[0], 'define(function () {\n  "use strict";\n  let _exports = {};\n  let A, B;\n  _exports.A = A;\n  _exports.B = B;\n  return _exports;\n});\n')
   equal(codes[1], `\ndefine(['test/input/${input}'], res => res);\n`)
 }
 
 test('use plugin', async function () {
-  const input = 'esm-export-named-2.js'
+  const input = 'esm-export-named-2'
   await pluginLoad(input)
   await pluginWrite(input)
 })
@@ -83,7 +84,7 @@ test('use plugin', async function () {
 async function testPluginValidSingle(input) {
   const content = await readFile(join(__dirname, 'input', input), 'utf8')
   const name = input === 'amd-relative.js' ? `test/input/${input}` : input
-  const actual = transform(content, name).code.trimEnd()
+  const actual = transform(content, name, { useStrict: false }).code.trimEnd()
   const expected = (await readFile(join(__dirname, 'output', input), 'utf8')).trimEnd()
   if (expected !== actual) {
     throw new Error(`expected !== actual (${expected.length}, ${actual.length})
@@ -105,12 +106,12 @@ async function testPluginInvalidSingle(name) {
   const content = await readFile(join(__dirname, 'invalid', name), 'utf8')
   const message = firstLineComment(content)
   try {
-    transform(content, name).code.trimEnd()
+    transform(content, name, { useStrict: false }).code.trimEnd()
     throw new Error(`missing error: "${message}"`)
   } catch (err) {
     if (err.message !== message) {
       throw new Error(`expected error !== actual error
-  
+
   "${message}"
   "${err.message}"`)
     }
