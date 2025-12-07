@@ -1,5 +1,11 @@
 # Changes
 
+## [4.1.0](https://github.com/prantlf/requirejs-esm/compare/v4.0.0...v4.1.0) (2025-12-07)
+
+### Features
+
+* Support transformation and opdating hooks ([fbb6300](https://github.com/prantlf/requirejs-esm/commit/fbb6300fb4c46976c880d060a2a99070674bc67a))
+
 ## [4.0.0](https://github.com/prantlf/requirejs-esm/compare/v3.1.1...v4.0.0) (2025-11-09)
 
 ### Features
