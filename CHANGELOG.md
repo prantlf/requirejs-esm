@@ -1,5 +1,11 @@
 # Changes
 
+## [4.2.0](https://github.com/prantlf/requirejs-esm/compare/v4.1.0...v4.2.0) (2025-12-07)
+
+### Features
+
+* Always call AMD update hooks ([1f13d77](https://github.com/prantlf/requirejs-esm/commit/1f13d773f5c8f99599851be5f9766e0a81b6704f))
+
 ## [4.1.0](https://github.com/prantlf/requirejs-esm/compare/v4.0.0...v4.1.0) (2025-12-07)
 
 ### Features
