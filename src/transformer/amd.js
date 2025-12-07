@@ -153,17 +153,25 @@ export function detectDefinesOrRequires(program) {
 
 // Updates dependency paths to be prefixed by `esm!` or otherwise updated.
 export function updateAmdDeps(amd, options) {
-  options.onBeforeUpdate?.(amd)
+  let updated = options.onBeforeUpdate?.({
+    ...options,
+    amd
+  })
 
   const { deps } = amd
-  if (!deps) return
+  if (!deps) {
+    afterUpdate()
+    return updated
+  }
 
   const { sourceFileName: parentName } = options
   const { elements } = deps
-  if (!elements.length) return
+  if (!elements.length) {
+    afterUpdate()
+    return updated
+  }
 
   const { resolvePath } = options
-  let updated
   for (const element of elements) {
     if (element.type === 'Literal') {
       const moduleName = element.value
@@ -175,7 +183,25 @@ export function updateAmdDeps(amd, options) {
     }
   }
 
-  updated ||= options.onAfterUpdate?.(amd)
+  afterUpdate()
 
   return updated
+
+  function afterUpdate() {
+    const updatedNow = options.onAfterUpdate?.({
+      ...options,
+      amd
+    })
+    updated ||= updatedNow
+  }
+}
+
+export function callAmdUpdateHooks(amd, options) {
+  options = {
+    ...options,
+    amd
+  }
+  const updatedBefore = options.onBeforeUpdate?.(options)
+  const updatedAfter = options.onAfterUpdate?.(options)
+  return updatedBefore || updatedAfter
 }
