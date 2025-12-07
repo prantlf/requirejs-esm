@@ -9,7 +9,7 @@ export function transformAst(program, options = {}) {
     result.amd = true
     if (options.resolvePath) {
       for (const amd of amds) {
-        result.updated |= updateAmdDeps(amd, options)
+        result.updated ||= updateAmdDeps(amd, options)
       }
     }
   } else {

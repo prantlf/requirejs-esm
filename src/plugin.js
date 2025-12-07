@@ -28,7 +28,13 @@ const {
   // Enable console logging.
   verbose,
   // Directory to save a copy of the transformed modules.
-  debugDir
+  debugDir,
+  // ESM transformation callbacks.
+  onBeforeTransform,
+  onAfterTransform,
+  // AMD update callbacks.
+  onBeforeUpdate,
+  onAfterUpdate
 } = typeof module !== 'undefined' && module.config && module.config() || {}
 
 const buildMap = {}
@@ -109,7 +115,13 @@ export default {
           // Always produce the source maps when transpiling in the browser, otherwise
           // the debugging would me impossible. When building and bundling, check if
           // the source maps were enabled for the output.
-          sourceMap: sourceMap || !isBuild
+          sourceMap: sourceMap || !isBuild,
+          // ESM transformation callbacks.
+          onBeforeTransform,
+          onAfterTransform,
+          // AMD update callbacks.
+          onBeforeUpdate,
+          onAfterUpdate
         }))
         if (!updated) {
           verbose && console.log('esm: retaining', name)

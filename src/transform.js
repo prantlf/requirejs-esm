@@ -18,12 +18,28 @@ export default function transform(text, file, {
   useStrict,
   // Enable source maps, can be an object with booleans { inline, content }.
   // If set to true, the object will be set to { inline: true, content: true }.
-  sourceMap
+  sourceMap,
+  // ESM transformation callbacks.
+  onBeforeTransform,
+  onAfterTransform,
+  // AMD update callbacks.
+  onBeforeUpdate,
+  onAfterUpdate
 } = {}) {
   // const ast = parse(text, { ecmaVersion, sourceType: 'module', locations: true })
   let ast = parseModule(text, { next: true, loc: true })
 
-  const options = { sourceFileName: file, pluginName, resolvePath, originalResolvePath, useStrict }
+  const options = {
+    sourceFileName: file,
+    pluginName,
+    resolvePath,
+    originalResolvePath,
+    useStrict,
+    onBeforeTransform,
+    onAfterTransform,
+    onBeforeUpdate,
+    onAfterUpdate
+  }
   const { updated } = transformAst(ast, options)
 
   let code, map

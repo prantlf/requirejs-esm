@@ -9,7 +9,7 @@
 
 ### BREAKING CHANGES
 
-Each AMD module output will start with `"use strict"` by default from now on.  ESM execution mode is strict by default. Comply to this in the output AMD code too. If you use a module bundler, inserts `"use strict"` to the outer scope, you can set the `useStrict` flag to `false` to avoid inserting `"use strict"` to each inner AMD module.
+Each AMD module output will start with `"use strict"` by default from now on. ESM execution mode is strict by default. Comply to this in the output AMD code too. If you use a module bundler, which inserts `"use strict"` to the outer scope, you can set the `useStrict` flag to `false` to avoid inserting `"use strict"` to each inner AMD module.
 
 ## [3.1.1](https://github.com/prantlf/requirejs-esm/compare/v3.1.0...v3.1.1) (2025-05-14)
 

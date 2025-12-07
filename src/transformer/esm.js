@@ -82,6 +82,11 @@ export function detectImportsAndExports(program) {
 
 // Transforms the module format from ESM to AMD.
 export function transformEsmToAmd(program, options) {
+  options.onBeforeTransform?.({
+    ...options,
+    program
+  })
+
   const { body } = program
   let { length } = body
 
@@ -342,6 +347,12 @@ export function transformEsmToAmd(program, options) {
   }
 
   buildAmdModule(program, options, importPaths, importVars, namedImports)
+
+  options.onAfterTransform?.({
+    ...options,
+    program,
+    callbackBody: body
+  })
 
   function addExportStatement({ exported, local }) {
     const asName = exported.name

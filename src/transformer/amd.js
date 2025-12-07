@@ -153,6 +153,8 @@ export function detectDefinesOrRequires(program) {
 
 // Updates dependency paths to be prefixed by `esm!` or otherwise updated.
 export function updateAmdDeps(amd, options) {
+  options.onBeforeUpdate?.(amd)
+
   const { deps } = amd
   if (!deps) return
 
@@ -172,5 +174,8 @@ export function updateAmdDeps(amd, options) {
       }
     }
   }
+
+  updated ||= options.onAfterUpdate?.(amd)
+
   return updated
 }

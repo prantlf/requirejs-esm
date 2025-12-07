@@ -159,7 +159,13 @@ The `transform` method supports a subset of plugin options:
   useStrict: true,
   // Enable source maps, can be an object with booleans { inline, content }.
   // If set to true, the object will be set to { inline: true, content: true }.
-  sourceMap: false
+  sourceMap: false,
+  // ESM transformation callbacks.
+  onBeforeTransform,
+  onAfterTransform,
+  // AMD update callbacks.
+  onBeforeUpdate,
+  onAfterUpdate
 }
 ```
 
