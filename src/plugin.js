@@ -156,7 +156,7 @@ export default {
       // compiled with esm refer it with that name and this stub will simplify
       // the module loading by skipping the plugin evaluation.
       write.asModule(`${pluginName}!${moduleName}`,
-        '\ndefine([\'' + moduleName + '\'], res => res);\n')
+        `\ndefine(['${moduleName}'], res => res);\n`)
     }
 //>>excludeEnd('excludeEsm')
   }

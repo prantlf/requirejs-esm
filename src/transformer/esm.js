@@ -149,7 +149,7 @@ export function transformEsmToAmd(program, options) {
       // expression after keyword default
       const { declaration } = statement
       let exportValue = declaration
-      let needExportExpression = true
+      const needExportExpression = true
 
       if (declaration.type === 'FunctionDeclaration') {
         exportValue = toExpression(exportValue)
@@ -244,7 +244,7 @@ export function transformEsmToAmd(program, options) {
           const importVar = generateUidIdentifier(exportSource.value, program)
           importVars.push(importVar)
 
-          for (let specifier of specifiers) {
+          for (const specifier of specifiers) {
             const { exported, local } = specifier
             const { name } = local
             let localName

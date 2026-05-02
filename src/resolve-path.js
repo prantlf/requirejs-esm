@@ -71,7 +71,7 @@ export function resolvePath (sourcePath, currentFile, { pluginName, needsResolve
   // mapped there using the `paths` of `map` configuration properties.
   if ((sourcePath.charAt(0) === '.' && (sourcePath.charAt(1) === '/' ||
        sourcePath.charAt(1) === '.' && sourcePath.charAt(2) === '/')) &&
-      !(needsResolve && needsResolve(sourcePath, currentFile))) {
+      !(needsResolve?.(sourcePath, currentFile))) {
     sourcePath = joinPath(parentDir(currentFile), sourcePath)
     if (sourcePath.endsWith('.js')) sourcePath = sourcePath.substring(0, sourcePath.length - 3)
   }

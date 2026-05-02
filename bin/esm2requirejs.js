@@ -3,7 +3,7 @@
 // Require module dependencies.
 const { Command } = require('commander')
 const glob = require('tiny-glob')
-const { readFile, writeFile } = require('fs/promises')
+const { readFile, writeFile } = require('node:fs/promises')
 const { transform } = require('../dist/api')
 
 // Define the command-line interface.
@@ -18,7 +18,7 @@ program.description('Transforms an ESM module to AMD or adapts an AMD module for
   .option('-s, --source-map', 'write inline source maps to the adapted output')
   .option('-v, --verbose', 'print progress and call stack in case of error')
   .argument('[files...]')
-  .on('--help', function () {
+  .on('--help', () => {
     console.log()
     console.log('You can use one or more file names or one or more glob patterns to specify one')
     console.log('or more files. If you set the plugin name to an empty string, modules already')
@@ -45,7 +45,7 @@ if (!args.length) {
 }
 
 // Main entry point.
-(async function () {
+((async () => {
   try {
     const files = (await Promise.all(args.map(arg => glob(arg)))).flat()
     if (!files.length) {
@@ -75,4 +75,4 @@ if (!args.length) {
     console.error((!verbose && error.message) || error)
     process.exitCode = 1
   }
-}())
+})())

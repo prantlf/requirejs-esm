@@ -1,6 +1,6 @@
-const { join } = require('path')
+const { join } = require('node:path')
 const filesize = require('filesize')
-const { readFile } = require('fs/promises')
+const { readFile } = require('node:fs/promises')
 const { createSuite } = require('./suite')
 const { transform: transformEsm } = require('../dist/api')
 const { transform: transformEs6 } = require('requirejs-babel7/api')

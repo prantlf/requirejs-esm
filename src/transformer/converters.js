@@ -5,7 +5,7 @@ import { isValidIdentifier } from './validators'
 import { isIdentifierChar } from './identifier'
 
 export function toIdentifier(input) {
-  input = input + ''
+  input = `${input}`
 
   let name = ''
   for (const c of input) {
@@ -14,9 +14,7 @@ export function toIdentifier(input) {
 
   name = name.replace(/^[-0-9]+/, '')
 
-  name = name.replace(/[-\s]+(.)?/g, function (match, c) {
-    return c ? c.toUpperCase() : ''
-  })
+  name = name.replace(/[-\s]+(.)?/g, (_match, c) => c ? c.toUpperCase() : '')
 
   if (!isValidIdentifier(name)) {
     name = `_${name}`

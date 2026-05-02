@@ -1,5 +1,5 @@
 const { createSuite } = require('./suite')
-const { equal } = require('assert')
+const { equal } = require('node:assert')
 
 const skipModulesFew = [
   'lib/vendor/backbone',

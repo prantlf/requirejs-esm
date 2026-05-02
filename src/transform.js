@@ -27,7 +27,7 @@ export default function transform(text, file, {
   onAfterUpdate
 } = {}) {
   // const ast = parse(text, { ecmaVersion, sourceType: 'module', locations: true })
-  let ast = parseModule(text, { next: true, loc: true })
+  const ast = parseModule(text, { next: true, loc: true })
 
   const options = {
     sourceFileName: file,

@@ -21,7 +21,7 @@ if (typeof window !== 'undefined' && window.navigator && window.document) {
     xhr.send(null)
   }
 } else {
-  const { readFileSync } = require.nodeRequire ? require.nodeRequire('fs') : require('fs')
+  const { readFileSync } = require.nodeRequire ? require.nodeRequire('fs') : require('node:fs')
   fetchText = (path, callback) => {
     // Asynchronous reading is not possible during the build in the optimizer.
     try {

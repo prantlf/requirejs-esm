@@ -1,6 +1,6 @@
-const { readdir, readFile } = require('fs/promises')
-const { join, relative } = require('path')
-const { ok, equal } = require('assert')
+const { readdir, readFile } = require('node:fs/promises')
+const { join, relative } = require('node:path')
+const { ok, equal } = require('node:assert')
 const tehanu = require('tehanu')
 const { parseModule } = require('meriyah')
 const { generate } = require('astring')
@@ -10,14 +10,14 @@ const { req, config, onload } = require('./mock')
 
 const test = tehanu('esm')
 
-test('transform with sourcemap', function () {
+test('transform with sourcemap', () => {
   const code = transform('import A from "name"', 'test.js', { useStrict: false, sourceMap: true }).code
   equal(code, `define(["esm!name"], function (A) {});
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`)
 })
 
-test('transformAst works', function () {
-  let ast = parseModule('import A from "name"', { next: true })
+test('transformAst works', () => {
+  const ast = parseModule('import A from "name"', { next: true })
   const { updated } = transformAst(ast, { sourceFileName: 'test.js', pluginName: 'esm', resolvePath, useStrict: false })
   ok(updated)
   const code = generate(ast)
@@ -25,8 +25,8 @@ test('transformAst works', function () {
 `)
 })
 
-test('detectDefinesOrRequires works', function () {
-  let ast = parseModule('my.define("main", ["name"], A => {})', { next: true })
+test('detectDefinesOrRequires works', () => {
+  const ast = parseModule('my.define("main", ["name"], A => {})', { next: true })
   const modules = detectDefinesOrRequires(ast)
   equal(modules.length, 1)
   const { namespace, func, name, deps } = modules[0]
@@ -36,8 +36,8 @@ test('detectDefinesOrRequires works', function () {
   ok(deps)
 })
 
-test('detectImportsAndExports works', function () {
-  let ast = parseModule('import A from "name"', { next: true })
+test('detectImportsAndExports works', () => {
+  const ast = parseModule('import A from "name"', { next: true })
   const { imports, exports } = detectImportsAndExports(ast)
   equal(imports.length, 1)
   equal(exports.length, 0)
@@ -75,7 +75,7 @@ async function pluginWrite(input) {
   equal(codes[1], `\ndefine(['test/input/${input}'], res => res);\n`)
 }
 
-test('use plugin', async function () {
+test('use plugin', async () => {
   const input = 'esm-export-named-2'
   await pluginLoad(input)
   await pluginWrite(input)
