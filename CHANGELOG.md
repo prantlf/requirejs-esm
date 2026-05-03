@@ -1,5 +1,15 @@
 # Changes
 
+## [4.3.0](https://github.com/prantlf/requirejs-esm/compare/v4.2.0...v4.3.0) (2026-05-03)
+
+### Features
+
+* Allow not transforming if thout import export, recognise ignore comment ([5dcb0b1](https://github.com/prantlf/requirejs-esm/commit/5dcb0b1e800c9e96b06ff9573241feccbcca174f))
+
+### Bug Fixes
+
+* Satisfy the new linter ([2c7222f](https://github.com/prantlf/requirejs-esm/commit/2c7222f9667723d574742166dccd77038af85222))
+
 ## [4.2.0](https://github.com/prantlf/requirejs-esm/compare/v4.1.0...v4.2.0) (2025-12-07)
 
 ### Features
