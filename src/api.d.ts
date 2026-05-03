@@ -26,7 +26,9 @@ type OnAfterUpdate = (options: AmdOptions) => boolean
 interface TransformAstOptions {
   pluginName?: string /*= 'esm'' */
   resolvePath?: ResolvePath
+  skipIfNoImportExport?: boolean /*= false */
   useStrict?: boolean /*= true */
+  sourceMap?: boolean /*= false */
   onBeforeTransform?: OnBeforeTransform
   onAfterTransform?: OnAfterTransform
   onBeforeUpdate?: OnBeforeUpdate

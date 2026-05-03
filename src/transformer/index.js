@@ -1,5 +1,6 @@
 import { detectDefinesOrRequires, updateAmdDeps, callAmdUpdateHooks } from './amd'
 import { detectImportsAndExports, transformEsmToAmd } from './esm'
+import { processOrSkipByComment } from './comments'
 
 export function transformAst(program, options = {}) {
   const amds = detectDefinesOrRequires(program)
@@ -14,10 +15,9 @@ export function transformAst(program, options = {}) {
       result.updated ||= updated
     }
   } else {
-    transformEsmToAmd(program, options)
-    result.updated = true
+    result.updated = transformEsmToAmd(program, options)
   }
   return result
 }
 
-export { detectDefinesOrRequires, detectImportsAndExports }
+export { detectDefinesOrRequires, detectImportsAndExports, processOrSkipByComment }

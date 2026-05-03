@@ -4,7 +4,7 @@ import { parseModule } from 'meriyah'
 import { generate } from 'astring'
 import { SourceMapGenerator } from 'source-map'
 import convert from '@prantlf/convert-source-map'
-import { transformAst } from './transformer'
+import { transformAst, processOrSkipByComment } from './transformer'
 
 export default function transform(text, file, {
   // Allow using a different plugin alias than `esm` in the source code.
@@ -12,6 +12,8 @@ export default function transform(text, file, {
   // Method to update paths of module dependencies, to prefix JavaScript module
   // name with `esm!`, above all.
   resolvePath = originalResolvePath,
+  // Assume AMD/UMD if there're no import or export statements.
+  skipIfNoImportExport,
   // ecmaVersion = 2020,
   // Do not insert `"use strict"` expression to the AMD modules. You'd set it
   // to `false` if your bundler inserts `"use strict"` to the outer scope.
@@ -26,6 +28,13 @@ export default function transform(text, file, {
   onBeforeUpdate,
   onAfterUpdate
 } = {}) {
+  const processOrSkip = processOrSkipByComment(text)
+  if (processOrSkip === false) {
+    return { code: text, map: null, updated: false }
+  } else if (processOrSkip === true) {
+    skipIfNoImportExport = undefined;
+  }
+
   // const ast = parse(text, { ecmaVersion, sourceType: 'module', locations: true })
   const ast = parseModule(text, { next: true, loc: true })
 
@@ -35,6 +44,7 @@ export default function transform(text, file, {
     resolvePath,
     originalResolvePath,
     useStrict,
+    skipIfNoImportExport,
     onBeforeTransform,
     onAfterTransform,
     onBeforeUpdate,

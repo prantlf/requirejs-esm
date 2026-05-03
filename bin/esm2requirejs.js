@@ -16,6 +16,7 @@ program.description('Transforms an ESM module to AMD or adapts an AMD module for
   .option('-o, --output <file>', 'write the adapted module source to a file')
   .option('-r, --rewrite', 'rewrite the input files with the adapted output')
   .option('-s, --source-map', 'write inline source maps to the adapted output')
+  .option('-a, --skip-if-no-import-export', 'assume AMD/UMD if there\'re no import or export statements')
   .option('-v, --verbose', 'print progress and call stack in case of error')
   .argument('[files...]')
   .on('--help', () => {
@@ -35,6 +36,7 @@ const {
   /*ecma: ecmaVersion,*/
   plugin: pluginName,
   sourceMap,
+  skipIfNoImportExport,
   output: outputFile,
   rewrite,
   verbose
@@ -57,6 +59,7 @@ if (!args.length) {
         /*ecmaVersion,*/
         pluginName,
         sourceMap,
+        skipIfNoImportExport,
         verbose
       })
       if (updated) {

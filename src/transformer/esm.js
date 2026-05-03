@@ -318,6 +318,17 @@ export function transformEsmToAmd(program, options) {
     }
   }
 
+  // no imports and exports, do not wrap to AMD module, if AMD/UMD should be assumed
+  if (options.skipIfNoImportExport && !(importPaths.length || hasExport)) {
+    options.onAfterTransform?.({
+      ...options,
+      updated: false,
+      program,
+      callbackBody: body
+    })
+    return false
+  }
+
   // adding define wrapper
   if (hasExport && needReturnExport) {
     let returnStat
@@ -350,9 +361,12 @@ export function transformEsmToAmd(program, options) {
 
   options.onAfterTransform?.({
     ...options,
+    updated: true,
     program,
     callbackBody: body
   })
+
+  return true
 
   function addExportStatement({ exported, local }) {
     const asName = exported.name

@@ -16,6 +16,31 @@ test('transform with sourcemap', () => {
 //# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`)
 })
 
+test('transform can skip if no import export', () => {
+  const ast = parseModule('class A {}', { next: true })
+  const { updated } = transformAst(ast, { sourceFileName: 'test.js', useStrict: false, skipIfNoImportExport: true })
+  ok(!updated)
+})
+
+test('transform can skip by comment', () => {
+  const source = `// requirejs-esm-skip-file
+class A {}`
+  const { updated } = transform(source, 'test.js', { useStrict: false })
+  ok(!updated)
+})
+
+test('transform can process if no import export but forced by comment', () => {
+  const source = `// requirejs-esm-process-file
+class A {}`
+  const { code, updated } = transform(source, 'test.js', { skipIfNoImportExport: true })
+  ok(updated)
+  equal(code, `define(function () {
+  "use strict";
+  class A {}
+});
+`)
+})
+
 test('transformAst works', () => {
   const ast = parseModule('import A from "name"', { next: true })
   const { updated } = transformAst(ast, { sourceFileName: 'test.js', pluginName: 'esm', resolvePath, useStrict: false })

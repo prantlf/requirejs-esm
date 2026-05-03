@@ -1,3 +1,8 @@
 export { resolvePath } from './resolve-path'
 export { default as transform } from './transform'
-export { transformAst, detectDefinesOrRequires, detectImportsAndExports } from './transformer'
+export {
+  transformAst,
+  detectDefinesOrRequires,
+  detectImportsAndExports,
+  processOrSkipByComment
+} from './transformer'

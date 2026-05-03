@@ -16,6 +16,8 @@ const {
   onlyAmd,
   // List of module names not to check and transform.
   skipModules = [],
+  // Assume AMD/UMD if there're no import or export statements.
+  skipIfNoImportExport,
   // Method to update paths of module dependencies, to prefix JavaScript module
   // name with `esm!`, above all.
   resolvePath,
@@ -112,6 +114,7 @@ export default {
           resolvePath,
           /*ecmaVersion,*/
           useStrict,
+          skipIfNoImportExport,
           // Always produce the source maps when transpiling in the browser, otherwise
           // the debugging would me impossible. When building and bundling, check if
           // the source maps were enabled for the output.

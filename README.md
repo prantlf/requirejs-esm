@@ -123,6 +123,8 @@ The `esm` plugin supports configuration with the following defaults:
     mixedAmdAndEsm: false,
     // Suppress transpiling even if an optimized module has not been loaded yet.
     onlyAmd: false,
+    // Assume AMD/UMD if there're no import or export statements.
+    skipIfNoImportExport: false,
     // Do not insert `"use strict"` expression to the AMD modules. You'd set it
     // to `false` if your bundler inserts `"use strict"` to the outer scope.
     useStrict: true,
@@ -181,6 +183,14 @@ The returned object:
   updated: false | true
 }
 ```
+
+## Skipping ann Forcing Transformation
+
+If the option `skipIfNoImportExport` of `transform` is set to `true` and the input source contains neither `import` nor `export` statements, the input source won't be enclosed in the AMD wrapper. The input will be assumed to be in AMD/UMD format already.
+
+If the input source contains a line "// requirejs-esm-skip-file" among the first 10 lines shorter than 100 characters, the input file will not be transformed.
+
+If the input source contains a line "// requirejs-esm-process-file" among the first 10 lines shorter than 100 characters and the `transform` option `skipIfNoImportExport` is set to `true`, the input will be transformed nevertheless. The comment has a higher priority than the option.
 
 ## Contributing
 
