@@ -17,6 +17,7 @@ program.description('Transforms an ESM module to AMD or adapts an AMD module for
   .option('-r, --rewrite', 'rewrite the input files with the adapted output')
   .option('-s, --source-map', 'write inline source maps to the adapted output')
   .option('-a, --skip-if-no-import-export', 'assume AMD/UMD if there\'re no import or export statements')
+  .option('-d, --split-default-named-declarations', 'split default named export to declaration and export')
   .option('-v, --verbose', 'print progress and call stack in case of error')
   .argument('[files...]')
   .on('--help', () => {
@@ -37,6 +38,7 @@ const {
   plugin: pluginName,
   sourceMap,
   skipIfNoImportExport,
+  splitDefaultNamedDeclarations,
   output: outputFile,
   rewrite,
   verbose
@@ -60,6 +62,7 @@ if (!args.length) {
         pluginName,
         sourceMap,
         skipIfNoImportExport,
+        splitDefaultNamedDeclarations,
         verbose
       })
       if (updated) {

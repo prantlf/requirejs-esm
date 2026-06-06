@@ -18,6 +18,9 @@ export default function transform(text, file, {
   // Do not insert `"use strict"` expression to the AMD modules. You'd set it
   // to `false` if your bundler inserts `"use strict"` to the outer scope.
   useStrict,
+  // Split `export default class A {}` to `class A {}; export default A`
+  // to trade easier AST manipulation for 100% code compatibility.
+  splitDefaultNamedDeclarations,
   // Enable source maps, can be an object with booleans { inline, content }.
   // If set to true, the object will be set to { inline: true, content: true }.
   sourceMap,
@@ -45,6 +48,7 @@ export default function transform(text, file, {
     originalResolvePath,
     useStrict,
     skipIfNoImportExport,
+    splitDefaultNamedDeclarations,
     onBeforeTransform,
     onAfterTransform,
     onBeforeUpdate,

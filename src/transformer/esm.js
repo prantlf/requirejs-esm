@@ -87,6 +87,7 @@ export function transformEsmToAmd(program, options) {
     program
   })
 
+  const { splitDefaultNamedDeclarations } = options
   const { body } = program
   let { length } = body
 
@@ -148,47 +149,52 @@ export function transformEsmToAmd(program, options) {
 
       // expression after keyword default
       const { declaration } = statement
+      // export default X
       let exportValue = declaration
-      const needExportExpression = true
+      let keepDeclaration
 
-      if (declaration.type === 'FunctionDeclaration') {
-        exportValue = toExpression(exportValue)
-      }
-      if (declaration.type === 'ClassDeclaration') {
-        exportValue = toExpression(exportValue)
-        // const classNode = exportValue
-
-        // if (classNode.id) {
-        //   body[i] = classNode
-
-        //   const className = identifier(classNode.id.name)
-        //   let exportStat
-        //   if (i + 1 === length && isOnlyDefaultExport) {
-        //     exportStat = returnStatement(identifier(className))
-        //     needReturnExport = false
-        //   } else {
-        //     exportStat = exportStatement(exportsVar, 'default', className)
-        //   }
-
-        //   program.pushContainer('body', [exportStat])
-        //   needExportExpression = false
-        // } else {
-        //   exportValue = toExpression(classNode)
-        // }
-      }
-
-      if (needExportExpression) {
-        let exportStat
-
-        if (i + 1 === length && isOnlyDefaultExport) {
-          exportStat = returnStatement(exportValue)
-          needReturnExport = false
+      if (declaration.type === 'FunctionDeclaration' ||
+          declaration.type === 'ClassDeclaration') {
+        const { id } = declaration
+        if (id && splitDefaultNamedDeclarations) {
+          // export default function X() {}
+          // export default class X {}
+          exportValue = identifier(declaration.id.name)
+          keepDeclaration = true
         } else {
-          exportStat = exportStatement(exportsVar, 'default', exportValue)
+          // export default function () {}
+          // export default class {}
+          exportValue = toExpression(declaration)
         }
-
-        body[i] = exportStat
       }
+
+      let exportStat
+
+      if (i + 1 === length && isOnlyDefaultExport) {
+        exportStat = returnStatement(exportValue)
+        needReturnExport = false
+      } else {
+        exportStat = exportStatement(exportsVar, 'default', exportValue)
+      }
+
+      // This changes the original code by putting the name of the exported
+      // function or class to the module scope. Being able to access the class
+      // by name simplifies other AST manipulations, which would have to be more
+      // complicated. Or the developer would have to help the manipulator
+      // by separating the export expression to a declaration and an export
+      // of an identifier. Use it if it doesn't break your code.
+      //
+      // // original, the name X is not in the module scope
+      // export default class X {}
+      //
+      // // converted, the name X is in the module scope
+      // class X {}
+      // export default X
+      if (keepDeclaration) {
+        body.splice(i++, 0, declaration)
+        ++length
+      }
+      body[i] = exportStat
     }
 
     // export {x as y}

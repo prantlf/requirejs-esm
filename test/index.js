@@ -68,6 +68,28 @@ test('detectImportsAndExports works', () => {
   equal(exports.length, 0)
 })
 
+test('splits default export of named class', () => {
+  const source = 'export default class A {}'
+  const { code, updated } = transform(source, 'test.js', { splitDefaultNamedDeclarations: true, useStrict: false })
+  ok(updated)
+  equal(code, `define(function () {
+  class A {}
+  return A;
+});
+`)
+})
+
+test('splits default export of named function', () => {
+  const source = 'export default function A() {}'
+  const { code, updated } = transform(source, 'test.js', { splitDefaultNamedDeclarations: true, useStrict: false })
+  ok(updated)
+  equal(code, `define(function () {
+  function A() {}
+  return A;
+});
+`)
+})
+
 async function pluginLoad(input) {
   const dir = relative(process.cwd(), __dirname)
   onload.init()

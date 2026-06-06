@@ -25,6 +25,9 @@ const {
   // Do not insert `"use strict"` expression to the AMD modules. You'd set it
   // to `false` if your bundler inserts `"use strict"` to the outer scope.
   useStrict,
+  // Split `export default class A {}` to `class A {}; export default A`
+  // to trade easier AST manipulation for 100% code compatibility.
+  splitDefaultNamedDeclarations,
   // Boolean or object with booleans { inline, content }.
   sourceMap,
   // Enable console logging.
@@ -115,6 +118,7 @@ export default {
           /*ecmaVersion,*/
           useStrict,
           skipIfNoImportExport,
+          splitDefaultNamedDeclarations,
           // Always produce the source maps when transpiling in the browser, otherwise
           // the debugging would me impossible. When building and bundling, check if
           // the source maps were enabled for the output.

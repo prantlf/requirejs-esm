@@ -128,6 +128,9 @@ The `esm` plugin supports configuration with the following defaults:
     // Do not insert `"use strict"` expression to the AMD modules. You'd set it
     // to `false` if your bundler inserts `"use strict"` to the outer scope.
     useStrict: true,
+    // Split `export default class A {}` to `class A {}; export default A`
+    // to trade easier AST manipulation for 100% code compatibility.
+    splitDefaultNamedDeclarations: false,
     // Enable source maps, can be an object with booleans { inline, content }.
     // If set to true, the object will be set to { inline: true, content: true }.
     sourceMap: false,
@@ -184,7 +187,7 @@ The returned object:
 }
 ```
 
-## Skipping ann Forcing Transformation
+## Skipping and Forcing Transformation
 
 If the option `skipIfNoImportExport` of `transform` is set to `true` and the input source contains neither `import` nor `export` statements, the input source won't be enclosed in the AMD wrapper. The input will be assumed to be in AMD/UMD format already.
 

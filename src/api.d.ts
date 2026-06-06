@@ -28,6 +28,7 @@ interface TransformAstOptions {
   resolvePath?: ResolvePath
   skipIfNoImportExport?: boolean /*= false */
   useStrict?: boolean /*= true */
+  splitDefaultNamedDeclarations?: boolean /*= false */
   sourceMap?: boolean /*= false */
   onBeforeTransform?: OnBeforeTransform
   onAfterTransform?: OnAfterTransform
