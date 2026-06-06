@@ -1,5 +1,12 @@
 # Changes
 
+## [4.4.0](https://github.com/prantlf/requirejs-esm/compare/v4.3.0...v4.4.0) (2026-06-06)
+
+### Features
+
+* Upgrade dependencies ([b65972b](https://github.com/prantlf/requirejs-esm/commit/b65972b40ad75136ee2d081a1882a31f09794eb6))
+* Split default named export to declaration and export ([82628e7](https://github.com/prantlf/requirejs-esm/commit/82628e73de9454b1363c37a04001eeb2a6ec9fb9))
+
 ## [4.3.0](https://github.com/prantlf/requirejs-esm/compare/v4.2.0...v4.3.0) (2026-05-03)
 
 ### Features
