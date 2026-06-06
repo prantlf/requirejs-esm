@@ -78,18 +78,18 @@
     "tiny-glob": "^0.2.9"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.4.14",
-    "@prantlf/requirejs": "^3.3.1",
-    "@rollup/plugin-commonjs": "^29.0.2",
+    "@biomejs/biome": "^2.4.16",
+    "@prantlf/requirejs": "^3.4.0",
+    "@rollup/plugin-commonjs": "^29.0.3",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "c8": "^11.0.0",
     "lit-html": "^1",
-    "rollup": "^4.60.2",
+    "rollup": "^4.61.1",
     "tehanu": "^1.0.1",
     "tehanu-repo-coco": "^1.0.1",
     "tehanu-teru": "^1.0.1",
-    "terser": "^5.46.2"
+    "terser": "^5.48.0"
   },
   "keywords": [
     "requirejs-plugin",
