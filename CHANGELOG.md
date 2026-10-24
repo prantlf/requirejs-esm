@@ -1,5 +1,19 @@
 # Changes
 
+## [5.0.0](https://github.com/prantlf/requirejs-esm/compare/v4.4.0...v5.0.0) (2026-10-24)
+
+### Chores
+
+* Upgrade, convert to ESM ([b2f6d27](https://github.com/prantlf/requirejs-esm/commit/b2f6d27b13cfc98a00f15c423fe7b33899546bbc))
+
+### BREAKING CHANGES
+
+Exports are now divided to ESM and CJS. This remains
+from the previous version and thus it shouldn't break anything.
+Nevertheless, it needs to be tested. The scripts in the bin directory
+are ESM now and need Node.js 22 or newer. This shouldn't be a problem
+today either.
+
 ## [4.4.0](https://github.com/prantlf/requirejs-esm/compare/v4.3.0...v4.4.0) (2026-06-06)
 
 ### Features
