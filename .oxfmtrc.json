@@ -8,5 +8,5 @@
     "newlinesBetween": false
   },
   "sortImports.newlinesBetween": false,
-  "ignorePatterns": ["dist/**", "test/*/**", "CHANGELOG.md"]
+  "ignorePatterns": ["dist/**", "test/*/**", "*/build.config.js", "CHANGELOG.md"]
 }
