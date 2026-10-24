@@ -1,7 +1,7 @@
-const { createFilter } = require('@rollup/pluginutils')
-const MagicString = require('magic-string')
+import { createFilter } from '@rollup/pluginutils'
+import MagicString from 'magic-string'
 
-module.exports = function ignoreCoverage({
+export default function ignoreCoverage({
   include = ['**/*.js'],
   exclude,
   root = process.cwd(),

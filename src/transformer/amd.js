@@ -1,4 +1,4 @@
-import { replaceLiteral } from './converters'
+import { replaceLiteral } from './converters.js'
 
 // Detects if an expression calls define or require function.
 // Returns information about an AMD module false, { deps } or [{ deps }, ...].
@@ -39,7 +39,7 @@ function detectDefineOrRequireCall(expr) {
     }
     if (arg.type === 'FunctionExpression' || arg.type === 'ArrowFunctionExpression') {
       if (!deps) {
-        ({ params, deps } = detectCjsDeps(arg) || {})
+        ;({ params, deps } = detectCjsDeps(arg) || {})
       } else {
         params = arg.params
       }
@@ -67,7 +67,7 @@ function detectDefineOrRequireCall(expr) {
 // Checks if the expression parameters can support CJS-like require calls
 // in the expression body.
 function isCjsExpression(expr) {
-  const { params } = expr;
+  const { params } = expr
   if (!params.length) return false
   const param = params[0]
   return param.type === 'Identifier' && param.name === 'require'
@@ -133,10 +133,9 @@ function detectDefineOrRequire(stat) {
 
   // multiple define/require statements in one file
   if (expression.type === 'SequenceExpression') {
-    return expression
-      .expressions
+    return expression.expressions
       .map(detectDefineOrRequireCall)
-      .reduce((all, one) => one ? all.concat(one) : all, [])
+      .reduce((all, one) => (one ? all.concat(one) : all), [])
   }
 
   return detectDefineOrRequireCall(expression)
@@ -146,9 +145,7 @@ function detectDefineOrRequire(stat) {
 // Returns information about the AMD modules [{ deps }, ...] or [].
 export function detectDefinesOrRequires(program) {
   const { body } = program
-  return body
-    .map(detectDefineOrRequire)
-    .reduce((all, one) => one ? all.concat(one) : all, [])
+  return body.map(detectDefineOrRequire).reduce((all, one) => (one ? all.concat(one) : all), [])
 }
 
 // Updates dependency paths to be prefixed by `esm!` or otherwise updated.

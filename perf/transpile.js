@@ -1,9 +1,9 @@
-const { join } = require('node:path')
-const filesize = require('filesize')
-const { readFile } = require('node:fs/promises')
-const { createSuite } = require('./suite')
-const { transform: transformEsm } = require('../dist/api')
-const { transform: transformEs6 } = require('requirejs-babel7/api')
+import { readFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import { filesize } from 'filesize'
+import { transform as transformEs6 } from 'requirejs-babel7/api.js'
+import { transform as transformEsm } from '../src/api.js'
+import { createSuite } from './suite.js'
 
 const names = [
   'ast',
@@ -23,7 +23,7 @@ const names = [
   // 'scope',
   'tokens',
   'walker',
-  'walkers',
+  'walkers'
 ]
 
 async function warmEsm() {
@@ -64,7 +64,7 @@ async function transpileAll() {
   let totalLines = 0
   let totalSize = 0
   for (const name of names) {
-    const content = await readFile(join(__dirname, 'oscript', `${name}.js`), 'utf8')
+    const content = await readFile(join(import.meta.dirname, 'oscript', `${name}.js`), 'utf8')
     const lines = content.split(/\r?\n/g)
     files.push(content)
     totalSize += content.length

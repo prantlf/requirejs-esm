@@ -1,6 +1,8 @@
-const { Suite } = require('benchmark')
+import benchmark from 'benchmark'
 
-function createSuite (description) {
+const { Suite } = benchmark
+
+function createSuite(description) {
   const suite = new Suite()
   suite.start = () => suite.run()
   console.log(description)
@@ -16,4 +18,4 @@ function createSuite (description) {
     .on('error', ({ target }) => console.warn(target.error))
 }
 
-module.exports = { createSuite }
+export { createSuite }

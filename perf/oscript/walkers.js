@@ -1,4 +1,4 @@
-function ignore () {}
+function ignore() {}
 
 export const base = {}
 

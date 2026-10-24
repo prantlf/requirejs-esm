@@ -1,6 +1,6 @@
-import { isAnonymousImport, isImportDefault, isImportAllAs } from './validators'
-import { identifier } from './factories'
-import { toIdentifier } from './converters'
+import { toIdentifier } from './converters.js'
+import { identifier } from './factories.js'
+import { isAnonymousImport, isImportDefault, isImportAllAs } from './validators.js'
 
 function _generateUid(name, i) {
   let id = name
@@ -32,7 +32,7 @@ function getUids(program) {
     } else if (type === 'ExportNamedDeclaration') {
       const { declaration } = statement
       if (declaration) {
-      const { type } = declaration
+        const { type } = declaration
         // export var a = 1
         if (type === 'VariableDeclaration') {
           for (const { id } of declaration.declarations) {

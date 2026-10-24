@@ -1,7 +1,7 @@
 # ESM to AMD Plugin for RequireJS
 
 [![Latest version](https://img.shields.io/npm/v/requirejs-esm)
- ![Dependency status](https://img.shields.io/librariesio/release/npm/requirejs-esm)
+![Dependency status](https://img.shields.io/librariesio/release/npm/requirejs-esm)
 ](https://www.npmjs.com/package/requirejs-esm)
 
 A [RequireJS] plugin converting JavaScript modules from ESM to AMD. It takes care only of the module format; it does not transpile the language and that is why it is [a lot faster] than plugins using [Babel]. If you need to transpile the code to an earlier ECMAScript version, have a look at [requirejs-babel7].
@@ -147,8 +147,8 @@ The `esm` plugin supports configuration with the following defaults:
 The transformation applied by the plugin can be performed programmatically too.
 
 ```js
-const { transform } = require('requirejs-esm/dist/api')
-const { code }  = transform('import a from "a"', 'test', { sourceMap: true })
+import { transform } from 'requirejs-esm'
+const { code } = transform('import a from "a"', 'test', { sourceMap: true })
 ```
 
 The `transform` method supports a subset of plugin options:

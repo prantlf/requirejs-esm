@@ -1,9 +1,9 @@
-const { rollup } = require('rollup')
-const commonjs = require('@rollup/plugin-commonjs')
-const { nodeResolve } = require('@rollup/plugin-node-resolve')
-const json = require('@rollup/plugin-json')
-const { dirname } = require('path')
-const patchPlugin = require('./patch-plugin')
+import { mkdir, writeFile } from 'node:fs/promises'
+import commonjs from '@rollup/plugin-commonjs'
+import json from '@rollup/plugin-json'
+import { nodeResolve } from '@rollup/plugin-node-resolve'
+import { rollup } from 'rollup'
+import patchPlugin from './patch-plugin.js'
 
 const verbose = false
 
@@ -11,43 +11,52 @@ async function compile(input) {
   console.log(`Bundling "${input}".`)
   const bundle = await rollup({
     input,
-    plugins: [
-      commonjs(), nodeResolve({ browser: true, preferBuiltins: false }), json()
-    ]
+    plugins: [commonjs(), nodeResolve({ browser: true, preferBuiltins: false }), json()]
   })
   if (verbose) {
-    console.log(bundle.watchFiles.map(path => {
-      let prefix = dirname(__dirname).length + 1
-      return path.substring(path.charAt(0) === '\x00' ? prefix + 1 : prefix)
-    }))
+    console.log(
+      bundle.watchFiles.map(path => {
+        let prefix = import.meta.dirname.length + 1
+        return path.substring(path.charAt(0) === '\x00' ? prefix + 1 : prefix)
+      })
+    )
   }
   return bundle
 }
 
-async function write(bundle, file, name) {
-  await bundle.write({ file, format: 'umd', name, sourcemap: true })
+async function write(bundle, file, options) {
+  await bundle.write({ file, sourcemap: true, ...options })
   console.log(`Written "${file}"`)
 }
 
-async function build(file, name) {
-  const bundle = await compile(`src/${file}`)
+async function buildPlugin() {
+  const bundle = await compile('src/plugin.js')
   try {
-    await write(bundle, `dist/${file}`, name)
+    await write(bundle, 'dist/plugin.js', { format: 'umd', name: 'requirejsEsmPlugin' })
+    await patchPlugin()
   } finally {
     await bundle.close()
   }
 }
 
-async function buildPlugin() {
-  await build('plugin.js', 'requirejsEsmPlugin')
-  await patchPlugin()
-}
-
 async function buildAPI() {
-  await build('api.js', 'requirejsEsmAPI')
+  const bundle = await compile('src/api.js')
+  try {
+    await write(bundle, 'dist/api.js', { format: 'umd', name: 'requirejsEsmAPI' })
+  } finally {
+    await bundle.close()
+  }
 }
 
-Promise.all([buildPlugin(), buildAPI()]).catch(error => {
-  console.error(error)
-  process.exitCode = 1
-})
+async function writePackage() {
+  await mkdir('dist', { recursive: true })
+  await writeFile(
+    'dist/package.json',
+    `{
+  "private": true,
+  "type": "commonjs"
+}`
+  )
+}
+
+await Promise.all([buildPlugin(), buildAPI(), writePackage()])

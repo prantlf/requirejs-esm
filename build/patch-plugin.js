@@ -1,7 +1,7 @@
-const { readFile, writeFile } = require('fs/promises')
-const { join } = require('path')
-const { SourceMapConsumer, SourceMapGenerator } = require('source-map')
-const convert = require('@prantlf/convert-source-map')
+import { readFile, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
+import convert from '@prantlf/convert-source-map'
+import { SourceMapConsumer, SourceMapGenerator } from 'source-map'
 
 function patchCover(lines) {
   lines[2] = lines[2].replace('define(factory)', "define(['module'], factory)")
@@ -9,28 +9,32 @@ function patchCover(lines) {
 }
 
 async function patchBundle(lines) {
-  lines.splice(0, 5,
+  lines.splice(
+    0,
+    5,
     '(function (global, factory) {',
-    '  typeof define === \'function\' && define.amd ? define([',
-    '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)',
-    '      \'module\'',
-    '//>>excludeEnd(\'excludeEsm\')',
+    "  typeof define === 'function' && define.amd ? define([",
+    "//>>excludeStart('excludeEsm', pragmas.excludeEsm)",
+    "      'module'",
+    "//>>excludeEnd('excludeEsm')",
     '    ], factory) :',
-    '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)',
-    '  typeof exports === \'object\' && typeof module !== \'undefined\' ? module.exports = factory() :',
-    '//>>excludeEnd(\'excludeEsm\')',
-    '  (global = typeof globalThis !== \'undefined\' ? globalThis : global || self, global.requirejsEsmPlugin = factory());',
+    "//>>excludeStart('excludeEsm', pragmas.excludeEsm)",
+    "  typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :",
+    "//>>excludeEnd('excludeEsm')",
+    "  (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.requirejsEsmPlugin = factory());",
     '})(this, (function (',
-    '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)',
+    "//>>excludeStart('excludeEsm', pragmas.excludeEsm)",
     '  module',
-    '//>>excludeEnd(\'excludeEsm\')',
-    ') { \'use strict\';',
-    '//>>excludeStart(\'excludeEsm\', pragmas.excludeEsm)')
+    "//>>excludeEnd('excludeEsm')",
+    ") { 'use strict';",
+    "//>>excludeStart('excludeEsm', pragmas.excludeEsm)"
+  )
 }
 
 async function updateSourceMap(content, dir) {
   const converter = await convert.fromMapFileComment(content, dir, filepath =>
-    readFile(filepath, 'utf8'))
+    readFile(filepath, 'utf8')
+  )
   return SourceMapConsumer.with(converter.toJSON(), null, async consumer => {
     const generator = new SourceMapGenerator({ file: consumer.file })
     consumer.eachMapping(mapping => {
@@ -41,7 +45,7 @@ async function updateSourceMap(content, dir) {
         }
       }
       if (mapping.source != null) {
-        newMapping.source = mapping.source;
+        newMapping.source = mapping.source
         newMapping.original = {
           line: mapping.originalLine,
           column: mapping.originalColumn
@@ -62,8 +66,8 @@ async function updateSourceMap(content, dir) {
   })
 }
 
-module.exports = async function patchPlugin() {
-  const dir = join(__dirname, '../dist')
+export default async function patchPlugin() {
+  const dir = join(import.meta.dirname, '../dist')
   const file = join(dir, 'plugin.js')
   const content = await readFile(file, 'utf8')
   const lines = content.split('\n')

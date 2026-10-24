@@ -17,8 +17,14 @@ const LegacyAlias = 32768
 
 const KeywordOrIdentifier = Keyword | Identifier
 const PunctuatorOrKeyword = Punctuator | Keyword
-const Literal = StringLiteral | IntegerLiteral | RealLiteral | DateLiteral |
-  BooleanLiteral | UndefinedLiteral | ObjRef
+const Literal =
+  StringLiteral |
+  IntegerLiteral |
+  RealLiteral |
+  DateLiteral |
+  BooleanLiteral |
+  UndefinedLiteral |
+  ObjRef
 const NoCode = Whitespace | Comment | PreprocessorDirective | PreprocessedAway
 
 export {

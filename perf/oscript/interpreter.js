@@ -1,23 +1,23 @@
-import Scope from './scope'
-import getDefaultValue from './defaults'
+import getDefaultValue from './defaults.js'
+import Scope from './scope.js'
 
 const push = Array.prototype.push
 
 class InterpreterError extends Error {}
 class NotImplementedError extends InterpreterError {}
 class RuntimeError extends InterpreterError {
-  constructor (message, node) {
+  constructor(message, node) {
     super(message)
     this.node = node
   }
 }
 
-function ignore () {}
+function ignore() {}
 
 let warnings
 
-export function setOptions (options = {}) {
-  ({ warnings } = options)
+export function setOptions(options = {}) {
+  ;({ warnings } = options)
 }
 
 export const visitors = {}
@@ -76,7 +76,7 @@ visitors.IfStatement = (node, scope, walk) => {
   }
 }
 
-function tryElseIfClauses (otherClauses, scope, walk) {
+function tryElseIfClauses(otherClauses, scope, walk) {
   for (const otherClause of otherClauses) {
     if (walk(otherClause.test, otherClause, scope)) {
       for (const statement of otherClause.consequent) walk(statement, otherClause, scope)
@@ -90,7 +90,7 @@ visitors.SwitchStatement = (node, scope, walk) => {
   node.cases.some(switchCase => trySwitchCase(discriminant, switchCase, scope, walk))
 }
 
-function trySwitchCase (discriminant, node, scope, walk) {
+function trySwitchCase(discriminant, node, scope, walk) {
   if (!node.tests || node.tests.some(test => walk(test, node, scope) === discriminant)) {
     for (const statement of node.consequent) walk(statement, node, scope)
     return true
@@ -120,9 +120,11 @@ visitors.RepeatStatement = (node, scope, walk) => {
 }
 
 visitors.ForStatement = (node, scope, walk) => {
-  for (node.init && walk(node.init, node, scope);
+  for (
+    node.init && walk(node.init, node, scope);
     !node.test || walk(node.test, node, scope);
-    node.update && walk(node.update, node, scope)) {
+    node.update && walk(node.update, node, scope)
+  ) {
     scope.break = scope.continue = false
     for (const statement of node.body) {
       walk(statement, node, scope)
@@ -157,13 +159,17 @@ visitors.StructuredForStatement = (node, scope, walk) => {
       if (scope.break) return
       if (scope.continue) break
     }
-    scope.set(name, node.down ? index -= step : index += step)
+    scope.set(name, node.down ? (index -= step) : (index += step))
   }
 }
 
-visitors.BreakStatement = (node, scope) => { scope.break = true }
+visitors.BreakStatement = (_node, scope) => {
+  scope.break = true
+}
 
-visitors.ContinueStatement = (node, scope) => { scope.continue = true }
+visitors.ContinueStatement = (_node, scope) => {
+  scope.continue = true
+}
 
 visitors.BreakIfStatement = (node, scope, walk) => {
   scope.break = walk(node.test, node, scope)
@@ -173,7 +179,7 @@ visitors.ContinueIfStatement = (node, scope, walk) => {
   scope.continue = walk(node.test, node, scope)
 }
 
-visitors.GotoStatement = (node, scope, walk) => {
+visitors.GotoStatement = (_node, _scope, _walk) => {
   throw new NotImplementedError('goto is not implemented')
 }
 
@@ -186,8 +192,10 @@ visitors.ReturnStatement = (node, scope, walk) => {
 visitors.VariableDeclaration = (node, scope, walk) => {
   for (const declaration of node.declarations) {
     const { init } = declaration
-    scope.setOwn(declaration.id.value,
-      init ? walk(init, declaration, scope) : getDefaultValue(node.variableType))
+    scope.setOwn(
+      declaration.id.value,
+      init ? walk(init, declaration, scope) : getDefaultValue(node.variableType)
+    )
   }
 }
 
@@ -212,12 +220,19 @@ visitors.BinaryExpression = (node, scope, walk) => {
   return binaryOperation[operator](target, walk(right, node, scope), scope, left)
 }
 
-function isAssignment (symbol) {
-  return symbol === '=' ||  symbol === '+=' || symbol === '-=' ||
-    symbol === '*=' || symbol === '&=' || symbol === '|=' || symbol === '^='
+function isAssignment(symbol) {
+  return (
+    symbol === '=' ||
+    symbol === '+=' ||
+    symbol === '-=' ||
+    symbol === '*=' ||
+    symbol === '&=' ||
+    symbol === '|=' ||
+    symbol === '^='
+  )
 }
 
-function getName (node) {
+function getName(node) {
   const { type } = node
   return type === 'Identifier'
     ? node.value
@@ -226,7 +241,7 @@ function getName (node) {
       : undefined
 }
 
-function setVariable (name, value, scope, target) {
+function setVariable(name, value, scope, target) {
   if (!scope.set(name, value)) {
     if (warnings) throw new RuntimeError('variable not declared', target)
     scope.setOwn(name, value)
@@ -287,13 +302,17 @@ visitors.MemberExpression = (node, scope, walk) => {
   const object = walk(node.object, node, scope)
   if (!object) throw new RuntimeError('object is undefined', node.object)
   if (!(typeof object === 'object' && object && !Array.isArray(object))) {
-    throw new RuntimeError(`dereferenced source (${typeof array}) is not an object or assoc`, node.object)
+    throw new RuntimeError(
+      `dereferenced source (${typeof array}) is not an object or assoc`,
+      node.object
+    )
   }
   let { property } = node
   const { type } = property
-  property = type === 'Identifier' || type === 'LegacyAlias'
-    ? property.value
-    : walk(node.property, node, scope)
+  property =
+    type === 'Identifier' || type === 'LegacyAlias'
+      ? property.value
+      : walk(node.property, node, scope)
   return object[property]
 }
 
@@ -333,11 +352,12 @@ visitors.CallExpression = (node, scope, walk) => {
   }
   const args = routine.params.reduce((args, param, index) => {
     const value = values[index]
-    args[param.id.value] = value === undefined
-      ? param.init
+    args[param.id.value] =
+      value === undefined
+        ? param.init
           ? walk(param.init, node, scope)
           : getDefaultValue(param.parameterType)
-      : value
+        : value
     return args
   }, {})
   scope = new Scope(scope, args)
@@ -378,8 +398,8 @@ visitors.ListComprehension = (node, scope, walk) => {
   }, [])
 }
 
-visitors.AtExpression = visitors.ParenthesisExpression =
-  (node, scope, walk) => walk(node.expression, node, scope)
+visitors.AtExpression = visitors.ParenthesisExpression = (node, scope, walk) =>
+  walk(node.expression, node, scope)
 
 visitors.XlateExpression = (node, scope) => {
   let { raw } = node
@@ -401,24 +421,25 @@ visitors.Literal = ({ value }) => value
 
 // ---------- Preparation
 
-function prepareScript (node) {
-  const routines = node.routines = []
-  const variables = node.variables = []
-  const statements = node.statements = []
+function prepareScript(node) {
+  const routines = (node.routines = [])
+  const variables = (node.variables = [])
+  const statements = (node.statements = [])
   for (const part of node.body) {
     const { type } = part
-    const target = type === 'VariableDeclaration'
-      ? variables
-      : type === 'FunctionDeclaration' || type === 'ScriptDeclaration'
-        ? routines
-        : statements
+    const target =
+      type === 'VariableDeclaration'
+        ? variables
+        : type === 'FunctionDeclaration' || type === 'ScriptDeclaration'
+          ? routines
+          : statements
     target.push(part)
   }
 }
 
-function prepareFunction (node) {
-  const variables = node.variables = []
-  const statements = node.statements = []
+function prepareFunction(node) {
+  const variables = (node.variables = [])
+  const statements = (node.statements = [])
   for (const part of node.body) {
     const { type } = part
     const target = type === 'VariableDeclaration' ? variables : statements
@@ -426,21 +447,21 @@ function prepareFunction (node) {
   }
 }
 
-function prepareObjectName (node) {
+function prepareObjectName(node) {
   const raw = node.name
-    .map(({ value }) => typeof value === 'number' ? `&${value.toString(16)}` : value)
+    .map(({ value }) => (typeof value === 'number' ? `&${value.toString(16)}` : value))
     .join('::')
   node.raw = raw
   return raw
 }
 
-function prepareLegacyAlias (node) {
+function prepareLegacyAlias(node) {
   const raw = `&${node.value.toString(16)}`
   node.raw = raw
   return raw
 }
 
-function prepareXlateExpression (node) {
+function prepareXlateExpression(node) {
   const raw = `${node.ospace.value}.${node.string.value}`
   node.raw = raw
   return raw

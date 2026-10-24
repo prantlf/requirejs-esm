@@ -1,10 +1,10 @@
 /* global module */
 
-import fetchText from './fetch-text'
-import writeText from './write-text'
-import { childFile } from './resolve-path'
-import { setSkipModules, skipModule } from './skip-module'
-import transformSource from './transform'
+import fetchText from './fetch-text.js'
+import { childFile } from './resolve-path.js'
+import { setSkipModules, skipModule } from './skip-module.js'
+import transformSource from './transform.js'
+import writeText from './write-text.js'
 
 const {
   // Allow using a different plugin alias than `esm` in the source code.
@@ -40,7 +40,7 @@ const {
   // AMD update callbacks.
   onBeforeUpdate,
   onAfterUpdate
-} = typeof module !== 'undefined' && module.config && module.config() || {}
+} = (typeof module !== 'undefined' && module.config && module.config()) || {}
 
 const buildMap = {}
 
@@ -49,13 +49,13 @@ setSkipModules(skipModules)
 //>>excludeEnd('excludeEsm')
 export default {
   load(name, req, onload, reqConfig) {
-//>>excludeStart('excludeEsm', pragmas.excludeEsm)
+    //>>excludeStart('excludeEsm', pragmas.excludeEsm)
     const { isBuild } = reqConfig
     // if (!bundledModules) {
     //   bundledModules = new Set()
     //   const { bundles } = reqConfig
     //   if (bundles) {
-    //     verbose && console.log('esm: initialising bundles', name)
+    //     if (verbose) console.log('esm: initialising bundles', name)
     //     for (const bundle in bundles) {
     //       for (const module of bundles[bundle]) {
     //         bundledModules.add(module)
@@ -73,11 +73,11 @@ export default {
     // are external and will be loaded during the runtime.
     const url = req.toUrl(file)
     if (url.startsWith('empty:')) {
-      verbose && console.log('esm: skipping', name, 'mapped to', url)
+      if (verbose) console.log('esm: skipping', name, 'mapped to', url)
       return onload()
     }
 
-    verbose && console.log('esm: loading', name)
+    if (verbose) console.log('esm: loading', name)
     // If the module has been already defined from a module bundle, it was
     // already transpiled, when the output bundle was written. No need to
     // re-transpile it. This can happen only during the runtime.
@@ -91,28 +91,31 @@ export default {
     // If the whole application is transpiled, there is no need to transpile
     // ESM modules or prefix dependencies of AMD modules. Even not yet defined
     // modules can be loaded just by `require` to get better performance.
-    if (!mixedAmdAndEsm && !isBuild && req.specified(name) ||
-        /*bundledModules.has(name) ||*/ onlyAmd || skipModule(name) ||
-        // If the module was bundled, it had to be already transpiled.
-        !isBuild && childFile(url) !== childFile(file)) {
-      verbose && console.log('esm: delegating', name)
-//>>excludeEnd('excludeEsm')
+    if (
+      (!mixedAmdAndEsm && !isBuild && req.specified(name)) ||
+      /*bundledModules.has(name) ||*/ onlyAmd ||
+      skipModule(name) ||
+      // If the module was bundled, it had to be already transpiled.
+      (!isBuild && childFile(url) !== childFile(file))
+    ) {
+      if (verbose) console.log('esm: delegating', name)
+      //>>excludeEnd('excludeEsm')
       return req([name], onload, onload.error)
-//>>excludeStart('excludeEsm', pragmas.excludeEsm)
+      //>>excludeStart('excludeEsm', pragmas.excludeEsm)
     }
 
     // Fetch the text of the source module by AJAX and transpile it.
-    verbose && console.log('esm: fetching', name, 'mapped to', url)
+    if (verbose) console.log('esm: fetching', name, 'mapped to', url)
     fetchText(url, async (error, text) => {
       if (error) {
-        verbose && console.log('esm: missing', name)
+        if (verbose) console.log('esm: missing', name)
         return onload.error(error)
       }
 
       let code, updated
       try {
-        verbose && console.log('esm: transforming', name);
-        ({ code, updated } = transformSource(text, file, {
+        if (verbose) console.log('esm: transforming', name)
+        ;({ code, updated } = transformSource(text, file, {
           pluginName,
           resolvePath,
           /*ecmaVersion,*/
@@ -131,7 +134,7 @@ export default {
           onAfterUpdate
         }))
         if (!updated) {
-          verbose && console.log('esm: retaining', name)
+          if (verbose) console.log('esm: retaining', name)
           // return req([name], onload, onload.error)
         } else if (isBuild && debugDir) {
           writeText(`${debugDir}/${file}`, code)
@@ -148,7 +151,7 @@ export default {
         buildMap[name] = code
       }
 
-      verbose && console.log('esm: returning', name)
+      if (verbose) console.log('esm: returning', name)
       onload.fromText(code)
     })
   },
@@ -162,9 +165,8 @@ export default {
       // Add a stub of the module with the name prefixed by `esm!`. Modules
       // compiled with esm refer it with that name and this stub will simplify
       // the module loading by skipping the plugin evaluation.
-      write.asModule(`${pluginName}!${moduleName}`,
-        `\ndefine(['${moduleName}'], res => res);\n`)
+      write.asModule(`${pluginName}!${moduleName}`, `\ndefine(['${moduleName}'], res => res);\n`)
     }
-//>>excludeEnd('excludeEsm')
+    //>>excludeEnd('excludeEsm')
   }
 }

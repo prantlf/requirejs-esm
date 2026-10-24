@@ -1,12 +1,22 @@
-import { isAnonymousImport, isImportDefault, isImportAllAs } from './validators'
+import { toExpression, replaceLiteral, exportStatement } from './converters.js'
 import {
-  identifier, memberExpression, objectExpression, arrayExpression, blockStatement,
-  variableDeclaration, variableDeclarator, returnStatement, expressionStatement,
-  forInStatement, assignmentExpression, callExpression, functionExpression,
+  identifier,
+  memberExpression,
+  objectExpression,
+  arrayExpression,
+  blockStatement,
+  variableDeclaration,
+  variableDeclarator,
+  returnStatement,
+  expressionStatement,
+  forInStatement,
+  assignmentExpression,
+  callExpression,
+  functionExpression,
   literal
-} from './factories'
-import { toExpression, replaceLiteral, exportStatement } from './converters'
-import { generateUid, generateUidIdentifier } from './generate-id'
+} from './factories.js'
+import { generateUid, generateUidIdentifier } from './generate-id.js'
+import { isAnonymousImport, isImportDefault, isImportAllAs } from './validators.js'
 
 // Detects if a program contains import statements.
 // Returns information about the import statemets [{ node, source, specifiers|local }, ...] or [].
@@ -56,12 +66,16 @@ export function detectImportsAndExports(program) {
       // export var a = 1
       if (!specifiers.length) {
         exports.push({ node })
-      } else { // export {x as y}
+      } else {
+        // export {x as y}
         // export { ... } from "module"
         const { source } = node
         if (source) {
           exports.push({ node, source, import: true })
-          const specifiers = node.specifiers.map(({ exported: imported, local }) => ({ imported, local }))
+          const specifiers = node.specifiers.map(({ exported: imported, local }) => ({
+            imported,
+            local
+          }))
           imports.push({ node, source, specifiers, export: true })
         } else {
           exports.push({ node })
@@ -153,8 +167,7 @@ export function transformEsmToAmd(program, options) {
       let exportValue = declaration
       let keepDeclaration
 
-      if (declaration.type === 'FunctionDeclaration' ||
-          declaration.type === 'ClassDeclaration') {
+      if (declaration.type === 'FunctionDeclaration' || declaration.type === 'ClassDeclaration') {
         const { id } = declaration
         if (id && splitDefaultNamedDeclarations) {
           // export default function X() {}
@@ -240,7 +253,8 @@ export function transformEsmToAmd(program, options) {
           const exportStat = exportStatement(exportsVar, asName, identifier(asName))
           body.push(exportStat)
         }
-      } else { // export {x as y}
+      } else {
+        // export {x as y}
         // export { ... } from "module"
         const exportSource = statement.source
         if (exportSource) {
@@ -290,7 +304,9 @@ export function transformEsmToAmd(program, options) {
                 throw new Error('Expression `export { default }` is not supported.')
               } else {
                 // export {default as A}
-                throw new Error(`Expression \`export { default as ${exported.name} }\` is not supported.`)
+                throw new Error(
+                  `Expression \`export { default as ${exported.name} }\` is not supported.`
+                )
               }
             } else if (exported.name === 'default') {
               // export {A as default}
@@ -344,17 +360,14 @@ export function transformEsmToAmd(program, options) {
     } else {
       // var _exports = {}
       body.unshift(
-        variableDeclaration('let', [
-          variableDeclarator(exportsVar, objectExpression([]))
-        ])
+        variableDeclaration('let', [variableDeclarator(exportsVar, objectExpression([]))])
       )
 
       // return <expression>
       if (isOnlyDefaultExport) {
         // return _exports.default
         returnStat = returnStatement(memberExpression(exportsVar, identifier('default')))
-      }
-      else {
+      } else {
         // return _exports
         returnStat = returnStatement(exportsVar)
       }
@@ -409,8 +422,12 @@ function exportCopyLoop(exportsVar, importVar) {
     importVar,
     blockStatement([
       expressionStatement(
-        assignmentExpression('=',
-          memberExpression(exportsVar, key, true), memberExpression(importVar, key, true)))
+        assignmentExpression(
+          '=',
+          memberExpression(exportsVar, key, true),
+          memberExpression(importVar, key, true)
+        )
+      )
     ])
   )
 }
@@ -427,18 +444,22 @@ function buildAmdModule(program, options, importPaths, importVars, namedImports)
   body.push(...program.body)
   const bodyStatement = blockStatement(body)
   program.body = [
-    expressionStatement(callExpression(
-      identifier('define'), importPaths.length ? [
-        prepareImportPaths(importPaths, options),
-        functionExpression(importVars, bodyStatement)
-      ] : [
-        functionExpression([], bodyStatement)
-      ]))
+    expressionStatement(
+      callExpression(
+        identifier('define'),
+        importPaths.length
+          ? [
+              prepareImportPaths(importPaths, options),
+              functionExpression(importVars, bodyStatement)
+            ]
+          : [functionExpression([], bodyStatement)]
+      )
+    )
   ]
 }
 
 // Update dependency paths to be prefixed by `esm!` or otherwise updated.
-function prepareImportPaths(importPaths, options ) {
+function prepareImportPaths(importPaths, options) {
   const { resolvePath } = options
   if (resolvePath) {
     const { sourceFileName: parentName } = options

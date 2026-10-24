@@ -3,7 +3,7 @@
 // a file name, it will return the file name. If the path includes a URL
 // query starting with the question mark, it will cut it away including the
 // question mark.
-export function childFile (path) {
+export function childFile(path) {
   const lastSlash = path.lastIndexOf('/')
   if (lastSlash > 0) {
     path = path.substring(lastSlash + 1)
@@ -15,7 +15,7 @@ export function childFile (path) {
 // Returns the parent directory by cutting the file name after the last slash,
 // leaving the slash in the result. If there is no slash in the path - the path
 // is just a file name, it will return `undefined`.
-function parentDir (path) {
+function parentDir(path) {
   const lastSlash = path.lastIndexOf('/')
   return lastSlash > 0 ? path.substring(0, lastSlash + 1) : undefined
 }
@@ -34,7 +34,7 @@ function pointsToParent(path) {
 }
 
 // Joins two paths together and avoids leaving "/./" or "/../" in the middle.
-function joinPath (first, second) {
+function joinPath(first, second) {
   // If the second part starts with "./", it can be safely removed.
   second = shortenPath(second)
   // The parent path can be undefined, if the file is located in the current directory.
@@ -59,19 +59,27 @@ function joinPath (first, second) {
 
 // Ensures that every JavaScript dependency will be prefixed by `esm!`.
 // Relative paths will be converted to be relative to the parent module.
-export function resolvePath (sourcePath, currentFile, { pluginName, needsResolve } = {}) {
+export function resolvePath(sourcePath, currentFile, { pluginName, needsResolve } = {}) {
   // Ignore paths with other plugins applied and the three built-in
   // pseudo-modules of RequireJS.
-  if (sourcePath.includes('!') || sourcePath === 'require' ||
-      sourcePath === 'module' || sourcePath === 'exports') return
+  if (
+    sourcePath.includes('!') ||
+    sourcePath === 'require' ||
+    sourcePath === 'module' ||
+    sourcePath === 'exports'
+  )
+    return
 
   // If `sourcePath` is relative to `currentFile` - starts with ./ or ../ -
   // prepend the parent directory of `currentFile` to it. This was needed
   // for modules located outside the source root (`baseUrl`), which were
   // mapped there using the `paths` of `map` configuration properties.
-  if ((sourcePath.charAt(0) === '.' && (sourcePath.charAt(1) === '/' ||
-       sourcePath.charAt(1) === '.' && sourcePath.charAt(2) === '/')) &&
-      !(needsResolve?.(sourcePath, currentFile))) {
+  if (
+    sourcePath.charAt(0) === '.' &&
+    (sourcePath.charAt(1) === '/' ||
+      (sourcePath.charAt(1) === '.' && sourcePath.charAt(2) === '/')) &&
+    !needsResolve?.(sourcePath, currentFile)
+  ) {
     sourcePath = joinPath(parentDir(currentFile), sourcePath)
     if (sourcePath.endsWith('.js')) sourcePath = sourcePath.substring(0, sourcePath.length - 3)
   }

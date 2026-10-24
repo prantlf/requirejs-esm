@@ -1,44 +1,43 @@
 /* eslint-disable camelcase */
 
-import { checkType } from './checks'
+import { checkType } from './checks.js'
 
 export const crlf = '\r\n'
 export const js_encodeuri = 1
 export const js_encodeuricomponent = 2
 export const js_escape = 3
 
-export function decodeforurl (text) {
+export function decodeforurl(text) {
   checkType(text, 'string', 1)
   return decodeURI(text)
 }
 
-export function encodeforurl (text) {
+export function encodeforurl(text) {
   checkType(text, 'string', 1)
   return encodeURI(text)
 }
 
-export function escape (text) {
+export function escape(text) {
   checkType(text, 'string', 1)
   return encodeURIComponent(text)
 }
 
-export function escapeforjs (text, mode) {
+export function escapeforjs(text, mode) {
   checkType(text, 'string', 1)
   if (mode === js_escape) return escape(text)
   if (mode === js_encodeuri) return encodeURI(text)
   if (mode === js_encodeuricomponent) return encodeURIComponent(text)
-  throw new TypeError(`JS_ESCAPE, JS_ENCODEURI or JS_ENCODEURICOMPONENT expected, but ${typeof mode}" found in the second argument`)
+  throw new TypeError(
+    `JS_ESCAPE, JS_ENCODEURI or JS_ENCODEURICOMPONENT expected, but ${typeof mode}" found in the second argument`
+  )
 }
 
-export function escapehtml (text) {
+export function escapehtml(text) {
   checkType(text, 'string', 1)
-  return text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/</g, '&gt;')
+  return text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/</g, '&gt;')
 }
 
-export function escapejson (text, trim = true) {
+export function escapejson(text, trim = true) {
   checkType(text, 'string', 1)
   checkType(text, 'boolean', 2)
   if (trim) text = text.trim()
@@ -46,7 +45,7 @@ export function escapejson (text, trim = true) {
   return string.substr(1, string.length - 2)
 }
 
-export function escapexml (text) {
+export function escapexml(text) {
   checkType(text, 'string', 1)
   return text
     .replace(/&/g, '&amp;')
@@ -55,26 +54,28 @@ export function escapexml (text) {
     .replace(/'/g, '&apos;')
 }
 
-export function tojson (text, trim = true) {
+export function tojson(text, trim = true) {
   checkType(text, 'string', 1)
   checkType(text, 'boolean', 2)
-  // TODO: Trim all strings in the serialized output.
-  return JSON.parse(trimStrings(text))
+  if (trim) {
+    text = trimStrings(text)
+  }
+  return JSON.parse(text)
 }
 
-export function unescape (text) {
+export function unescape(text) {
   checkType(text, 'string', 1)
   return decodeURIComponent(text)
 }
 
-export function unescapejson (text) {
+export function unescapejson(text) {
   checkType(text, 'string', 1)
   return JSON.parse(`"${text}}"`)
 }
 
 // ---------- other methods
 
-function trimStrings (value) {
+function trimStrings(value) {
   if (typeof value === 'string') return value.trim()
   if (Array.isArray(value)) {
     for (let i = 0, l = value.length; i < l; ++i) value[i] = trimStrings(value[i])

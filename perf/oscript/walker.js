@@ -1,4 +1,4 @@
-import { base } from './walkers'
+import { base } from './walkers.js'
 
 export { base }
 
@@ -30,16 +30,16 @@ export { base }
 //
 // The state argument can be used to give this walk an initial state.
 
-export function simple (node, visitors, baseVisitor, state) {
+export function simple(node, visitors, baseVisitor, state) {
   if (!baseVisitor) baseVisitor = base
   walk(node, null, state)
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     const { type } = node
     const callbacks = visitors[type]
     let pre, post
     if (callbacks) {
-      ({ pre, post } = callbacks)
+      ;({ pre, post } = callbacks)
       if (pre && pre(node, state, parent)) return
     }
     baseVisitor[type](node, state, walk)
@@ -50,19 +50,19 @@ export function simple (node, visitors, baseVisitor, state) {
 // An ancestor walk keeps an array of ancestor nodes (including the
 // current node) and passes them to the callbacks as third parameter.
 
-export function ancestor (node, visitors, baseVisitor, state) {
+export function ancestor(node, visitors, baseVisitor, state) {
   const ancestors = []
   if (!baseVisitor) baseVisitor = base
   walk(node, null, state)
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     const { type } = node
     const isNew = node !== ancestors[ancestors.length - 1]
     if (isNew) ancestors.push(node)
     const callbacks = visitors[type]
     let pre, post
     if (callbacks) {
-      ({ pre, post } = callbacks)
+      ;({ pre, post } = callbacks)
       if (pre) {
         const result = pre(node, state, ancestors)
         if (result) {
@@ -79,12 +79,12 @@ export function ancestor (node, visitors, baseVisitor, state) {
 
 // A full walk triggers the callbacks on each node
 
-export function full (node, callbacks, baseVisitor, state) {
+export function full(node, callbacks, baseVisitor, state) {
   const { pre, post } = callbacks
   if (!baseVisitor) baseVisitor = base
   walk(node, null, state)
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     const { type } = node
     if (pre && pre(node, state, parent)) return
     baseVisitor[type](node, state, walk)
@@ -95,13 +95,13 @@ export function full (node, callbacks, baseVisitor, state) {
 // An fullAncestor walk is like an ancestor walk, but triggers
 // the callbacks on each node
 
-export function fullAncestor (node, callbacks, baseVisitor, state) {
+export function fullAncestor(node, callbacks, baseVisitor, state) {
   const { pre, post } = callbacks
   const ancestors = []
   if (!baseVisitor) baseVisitor = base
   walk(node, null, state)
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     const { type } = node
     const isNew = node !== ancestors[ancestors.length - 1]
     if (isNew) ancestors.push(node)
@@ -124,7 +124,7 @@ export function fullAncestor (node, callbacks, baseVisitor, state) {
 // their child nodes (by calling their third argument on these
 // nodes).
 
-export function recursive (node, functions, baseVisitor, state) {
+export function recursive(node, functions, baseVisitor, state) {
   const visitor = functions ? make(functions, baseVisitor) : baseVisitor
   let lastNode
   try {
@@ -134,7 +134,7 @@ export function recursive (node, functions, baseVisitor, state) {
     throw error
   }
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     lastNode = node
     return visitor[node.type](node, state, walk)
   }
@@ -143,7 +143,7 @@ export function recursive (node, functions, baseVisitor, state) {
 // Used to create a custom walker. Will fill in all missing node
 // type properties with the defaults.
 
-export function make (functions, baseVisitor) {
+export function make(functions, baseVisitor) {
   return Object.assign(baseVisitor || base, functions)
 }
 
@@ -151,7 +151,7 @@ export function make (functions, baseVisitor) {
 // given test. Returns a { node, state } object, or  undefined when it does
 // not find a matching node.
 
-export function findNodeAround (node, position, test, baseVisitor, state) {
+export function findNodeAround(node, position, test, baseVisitor, state) {
   const { line, column } = position
   const { pre, post } = makeFindTest(test)
   if (!baseVisitor) baseVisitor = base
@@ -162,12 +162,17 @@ export function findNodeAround (node, position, test, baseVisitor, state) {
     throw error
   }
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     const { type, loc } = node
     const { start, end } = loc
-    if (start.line > line || end.line < line ||
-        (start.line  === line && start.line === end.line &&
-        (start.column > column || end.column < column))) return
+    if (
+      start.line > line ||
+      end.line < line ||
+      (start.line === line &&
+        start.line === end.line &&
+        (start.column > column || end.column < column))
+    )
+      return
     if (pre && pre(node, state, parent)) return
     baseVisitor[type](node, state, walk)
     if (post(node, state, parent)) throw new FoundWithParent(node, parent)
@@ -179,7 +184,7 @@ export function findNodeAround (node, position, test, baseVisitor, state) {
 // passes them to the test callbacks as a third parameter and includes them
 // in the returned object.
 
-export function findNodeAroundWithAncestors (node, position, test, baseVisitor, state) {
+export function findNodeAroundWithAncestors(node, position, test, baseVisitor, state) {
   const ancestors = []
   const { line, column } = position
   const { pre, post } = makeFindTest(test)
@@ -191,12 +196,17 @@ export function findNodeAroundWithAncestors (node, position, test, baseVisitor, 
     throw error
   }
 
-  function walk (node, parent, state) {
+  function walk(node, parent, state) {
     const { type, loc } = node
     const { start, end } = loc
-    if (start.line > line || end.line < line ||
-        (start.line  === line && start.line === end.line &&
-        (start.column > column || end.column < column))) return
+    if (
+      start.line > line ||
+      end.line < line ||
+      (start.line === line &&
+        start.line === end.line &&
+        (start.column > column || end.column < column))
+    )
+      return
     const isNew = node !== ancestors[ancestors.length - 1]
     if (isNew) ancestors.push(node)
     if (pre && pre(node, state, ancestors)) return
@@ -206,7 +216,7 @@ export function findNodeAroundWithAncestors (node, position, test, baseVisitor, 
   }
 }
 
-function makeFindTest (test) {
+function makeFindTest(test) {
   if (typeof test === 'string') return { post: ({ type }) => type === test }
   else if (typeof test === 'function') return { post: test }
   else if (!test) return { post: () => true }
@@ -214,9 +224,14 @@ function makeFindTest (test) {
 }
 
 class Found {
-  constructor (node) { this.node = node }
+  constructor(node) {
+    this.node = node
+  }
 }
 
 class FoundWithParent {
-  constructor (node, parent) { this.node = node; this.parent = parent }
+  constructor(node, parent) {
+    this.node = node
+    this.parent = parent
+  }
 }

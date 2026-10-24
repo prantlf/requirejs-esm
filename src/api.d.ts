@@ -5,7 +5,11 @@ interface ResolveOptions {
   needsResolve?: NeedsResolve
 }
 
-declare function resolvePath(sourcePath: string, currentFile: string, options?: ResolveOptions): string
+declare function resolvePath(
+  sourcePath: string,
+  currentFile: string,
+  options?: ResolveOptions
+): string
 
 interface AmdOptions {
   namespace?: Record<string, unknown>
@@ -17,7 +21,9 @@ interface AmdOptions {
   output?: Record<string, unknown>
 }
 
-type ResolvePath = ((sourcePath: string, currentFile: string, options?: ResolveOptions) => string) | false
+type ResolvePath =
+  | ((sourcePath: string, currentFile: string, options?: ResolveOptions) => string)
+  | false
 type OnBeforeTransform = (options: OnBeforeTransformOptions) => void
 type OnAfterTransform = (options: OnAfterTransformOptions) => void
 type OnBeforeUpdate = (options: AmdOptions) => boolean
@@ -50,7 +56,10 @@ interface OnAfterTransformOptions extends OnBeforeTransformOptions {
 
 declare function transform(contents: string, path: string, options?: TransformOptions): string
 
-declare function transformAst(ast: object, options?: TransformOptions): { amd?: true, updated?: true }
+declare function transformAst(
+  ast: object,
+  options?: TransformOptions
+): { amd?: true; updated?: true }
 
 declare function detectDefinesOrRequires(ast: object): {
   namespace?: object
@@ -68,11 +77,11 @@ declare function detectImportsAndExports(ast: object): {
     node: object
     source: string
     local?: string
-    specifiers?: { imported: string, local: string }[]
+    specifiers?: { imported: string; local: string }[]
     export?: true
   }[]
   exports: {
-    node: object,
+    node: object
     default?: true
     import?: true
   }[]

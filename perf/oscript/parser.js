@@ -1,37 +1,59 @@
-import * as tokenTypes from './tokens'
+import ast from './ast.js'
+import defaultOptions from './default-options.js'
 import {
-  isLineTerminator, isWhitespace, isDecimalDigit, isHexadecimalDigit,
-  isIdentifierStart, isIdentifierPart, isKeyword, isType, isUnaryOperator,
+  isLineTerminator,
+  isWhitespace,
+  isDecimalDigit,
+  isHexadecimalDigit,
+  isIdentifierStart,
+  isIdentifierPart,
+  isKeyword,
+  isType,
+  isUnaryOperator,
   getOperatorPrecedence
-} from './detection'
-import ast from './ast'
-import messages from './messages'
-import formatMessage from './format-message'
-import defaultOptions from './default-options'
+} from './detection.js'
+import formatMessage from './format-message.js'
+import messages from './messages.js'
+import * as tokenTypes from './tokens.js'
 
 const {
-  EOF, Punctuator, Keyword, PunctuatorOrKeyword, Identifier,
-  KeywordOrIdentifier, Literal, StringLiteral, IntegerLiteral, RealLiteral,
-  DateLiteral, BooleanLiteral, UndefinedLiteral, ObjRef, LegacyAlias,
-  Whitespace, Comment, PreprocessorDirective, PreprocessedAway
+  EOF,
+  Punctuator,
+  Keyword,
+  PunctuatorOrKeyword,
+  Identifier,
+  KeywordOrIdentifier,
+  Literal,
+  StringLiteral,
+  IntegerLiteral,
+  RealLiteral,
+  DateLiteral,
+  BooleanLiteral,
+  UndefinedLiteral,
+  ObjRef,
+  LegacyAlias,
+  Whitespace,
+  Comment,
+  PreprocessorDirective,
+  PreprocessedAway
 } = tokenTypes
 
 // ============================================================
 // Error Handling
 
 let sourceFile // name of the parsed source file
-let input      // input text to parse
-let offset     // offset of the currently evaluated character in the input text
-let lineStart  // offset in the input text where the current line starts
-let line       // currently parsed line in the input text (1-based)
-let tokens     // an array of tokens created since the tokenizing started
-let warnings   // an array of warnings encountered during parsing so far
+let input // input text to parse
+let offset // offset of the currently evaluated character in the input text
+let lineStart // offset in the input text where the current line starts
+let line // currently parsed line in the input text (1-based)
+let tokens // an array of tokens created since the tokenizing started
+let warnings // an array of warnings encountered during parsing so far
 
 // Creates a lexing or parsing error.
 //
 // Ensures properties offset, like, column and source on the error instance.
 
-function createError (message, code, offset, line, column, length, warning) {
+function createError(message, code, offset, line, column, length, warning) {
   const error = new SyntaxError(message)
   const properties = {
     code: { writable: true, value: code },
@@ -58,7 +80,7 @@ function createError (message, code, offset, line, column, length, warning) {
 //   // Say "expected [ near ("
 //   createErrorForToken(token, false, "expected %1 near %2", '[', token.value)
 
-function createErrorForToken (token, warning, id, ...args) {
+function createErrorForToken(token, warning, id, ...args) {
   const { code, text } = id
   const message = formatMessage(text, ...args)
   // offset is 0-based, line and column are 1-based
@@ -89,13 +111,13 @@ function createErrorForToken (token, warning, id, ...args) {
 //   // Say "expected [ near ("
 //   throwError(token, "expected %1 near %2", '[', token.value)
 
-function throwError (token, ...args) {
+function throwError(token, ...args) {
   throw createErrorForToken(token, false, ...args)
 }
 
 // Gets a raw value of a token.
 
-function getTokenText (token) {
+function getTokenText(token) {
   return token.raw !== undefined ? token.raw : input.slice(token.range[0], token.range[1])
 }
 
@@ -112,22 +134,44 @@ function getTokenText (token) {
 //   // Say "expected <name> near '0'"
 //   handleUnexpectedToken(token, '<name>')
 
-function handleUnexpectedToken (found, expected) {
+function handleUnexpectedToken(found, expected) {
   if (expected) throwError(found, messages.expectedToken, expected, getTokenText(nextToken))
   if (typeof found.type !== 'undefined') {
     let type
     switch (found.type) {
-      case EOF: throwError(found, messages.unexpectedEOF); break
-      case Punctuator: type = 'symbol'; break
-      case Keyword: type = 'keyword'; break
-      case Identifier: type = 'identifier'; break
-      case StringLiteral: type = 'string'; break
-      case IntegerLiteral: type = 'integer'; break
-      case RealLiteral: type = 'real'; break
-      case DateLiteral: type = 'date'; break
-      case BooleanLiteral: type = 'boolean'; break
-      case ObjRef: type = 'objref'; break
-      case LegacyAlias: type = 'legacyalias'; break
+      case EOF:
+        throwError(found, messages.unexpectedEOF)
+        break
+      case Punctuator:
+        type = 'symbol'
+        break
+      case Keyword:
+        type = 'keyword'
+        break
+      case Identifier:
+        type = 'identifier'
+        break
+      case StringLiteral:
+        type = 'string'
+        break
+      case IntegerLiteral:
+        type = 'integer'
+        break
+      case RealLiteral:
+        type = 'real'
+        break
+      case DateLiteral:
+        type = 'date'
+        break
+      case BooleanLiteral:
+        type = 'boolean'
+        break
+      case ObjRef:
+        type = 'objref'
+        break
+      case LegacyAlias:
+        type = 'legacyalias'
+        break
       case UndefinedLiteral:
         throwError(found, messages.unexpected, 'literal', 'undefined', getTokenText(nextToken))
     }
@@ -141,20 +185,20 @@ function handleUnexpectedToken (found, expected) {
 
 // ---------- Token extraction
 
-let length              // the length of the input text to parse
-let tokenStart          // offset of the currently parsed token in the input text
-let afterLineBreak      // if the current token occurs after a line break
-let afterScript         // if the current token occurs after a "script" keyword
-let enableTokenization  // if the upcoming tokens should be processed or ignored
-let includeWhitespace   // if whitespace should be included in tokens for onCreateToken
+let length // the length of the input text to parse
+let tokenStart // offset of the currently parsed token in the input text
+let afterLineBreak // if the current token occurs after a line break
+let afterScript // if the current token occurs after a "script" keyword
+let enableTokenization // if the upcoming tokens should be processed or ignored
+let includeWhitespace // if whitespace should be included in tokens for onCreateToken
 let includePreprocessor // if preprocessor directives and the source content ignored by them should be included in tokens for onCreateToken
-let onCreateToken       // callback for getting informed about any new token
+let onCreateToken // callback for getting informed about any new token
 
 // Scans the input at the current offset and returns a token lexed from it.
 // Skips white space, comments, preprocessor directives and the content
 // enclosed in the alternative part of the preprocessor condition
 
-function getTokenFromInput () {
+function getTokenFromInput() {
   let charCode, peekCharCode, asterisk
   // the beginning of a currently parsed whitespace
   let offsetWhitespace, lineStartWhitespace, lineWhitespace
@@ -172,10 +216,14 @@ function getTokenFromInput () {
     charCode = input.charCodeAt(offset)
     peekCharCode = input.charCodeAt(offset + 1)
     switch (charCode) {
-      case 32: case 9: case 0xB: case 0xC:
+      case 32:
+      case 9:
+      case 0xb:
+      case 0xc:
         ++offset
         continue
-      case 10: case 13:
+      case 10:
+      case 13:
         // Count two characters \r\n as one line break
         if (charCode === 13 && peekCharCode === 10) ++offset
         ++line
@@ -195,7 +243,8 @@ function getTokenFromInput () {
         lineWhitespace = line
         continue
       case 35: // #
-        if (!((peekCharCode === 39 && !oldVersion) || isDecimalDigit(peekCharCode))) { // '
+        if (!((peekCharCode === 39 && !oldVersion) || isDecimalDigit(peekCharCode))) {
+          // '
           mayNotifyAboutWhiteSpace()
           // ifdef or ifndef evaluated to false
           if (scanPreprocessorDirective(true) === false) scanSkippedByPreprocessor()
@@ -214,15 +263,23 @@ function getTokenFromInput () {
           // a useless escaping and ignore the character. Comment will
           // be ignored in the check.
           const peekAnotherCharCode = input.charCodeAt(offset + 2)
-          if (peekAnotherCharCode !== 47 && peekAnotherCharCode !== 42) { // /*
-            warnings.push(createErrorForToken({
-              type: Whitespace,
-              line,
-              lineStart: lineStart,
-              lastLine: line,
-              lastLineStart: lineStart,
-              range: [offset, offset + 1]
-            }, true, messages.uselessBackslash, '\\'))
+          if (peekAnotherCharCode !== 47 && peekAnotherCharCode !== 42) {
+            // /*
+            warnings.push(
+              createErrorForToken(
+                {
+                  type: Whitespace,
+                  line,
+                  lineStart: lineStart,
+                  lastLine: line,
+                  lastLineStart: lineStart,
+                  range: [offset, offset + 1]
+                },
+                true,
+                messages.uselessBackslash,
+                '\\'
+              )
+            )
           }
         }
         ++offset
@@ -257,7 +314,7 @@ function getTokenFromInput () {
   if (onCreateToken) onCreateToken(token)
   return token
 
-  function mayNotifyAboutWhiteSpace () {
+  function mayNotifyAboutWhiteSpace() {
     // Notify the caller about a white space
     if (onCreateToken && includeWhitespace && offsetWhitespace < offset) {
       onCreateToken({
@@ -274,7 +331,7 @@ function getTokenFromInput () {
   }
 }
 
-function scanSkippedByPreprocessor () {
+function scanSkippedByPreprocessor() {
   let charCode, peekCharCode, asterisk
   // Remember the beginning of the ignored content for the range computation
   const offsetToSkip = offset
@@ -287,7 +344,8 @@ function scanSkippedByPreprocessor () {
     charCode = input.charCodeAt(offset)
     peekCharCode = input.charCodeAt(offset + 1)
     switch (charCode) {
-      case 10: case 13:
+      case 10:
+      case 13:
         // Count two characters \r\n as one line break
         if (charCode === 13 && peekCharCode === 10) ++offset
         ++line
@@ -322,9 +380,10 @@ function scanSkippedByPreprocessor () {
   }
 }
 
-function scanOtherToken (charCode, peekCharCode) {
+function scanOtherToken(charCode, peekCharCode) {
   switch (charCode) {
-    case 39: case 34: // '"
+    case 39:
+    case 34: // '"
       return scanStringLiteral(false)
 
     case 96: // `
@@ -337,14 +396,23 @@ function scanOtherToken (charCode, peekCharCode) {
       throwError(null, messages.malformedHash, input.slice(offset, offset + 2))
       break
 
-    case 48: case 49: case 50: case 51: case 52: case 53:
-    case 54: case 55: case 56: case 57: // 0-9
+    case 48:
+    case 49:
+    case 50:
+    case 51:
+    case 52:
+    case 53:
+    case 54:
+    case 55:
+    case 56:
+    case 57: // 0-9
       return scanNumericOrDateLiteral(true)
 
     case 46: // .
       // If the dot is followed by a digit it's a float.
       if (isDecimalDigit(peekCharCode)) return scanNumericOrDateLiteral(false)
-      if (peekCharCode === 46) { // .
+      if (peekCharCode === 46) {
+        // .
         if (input.charCodeAt(offset + 2) === 46) return scanPunctuator('...')
         return scanPunctuator('..')
       }
@@ -400,8 +468,20 @@ function scanOtherToken (charCode, peekCharCode) {
       if (peekCharCode === 61) return scanPunctuator('==')
       return scanPunctuator('=')
 
-    case 37: case 44: case 47: case 63: case 64: case 123: case 125: case 91:
-    case 92: case 93: case 40: case 41: case 59: case 126: // % , / ? @ { } [ \ ] ( ) ; ~
+    case 37:
+    case 44:
+    case 47:
+    case 63:
+    case 64:
+    case 123:
+    case 125:
+    case 91:
+    case 92:
+    case 93:
+    case 40:
+    case 41:
+    case 59:
+    case 126: // % , / ? @ { } [ \ ] ( ) ; ~
       return scanPunctuator(input.charAt(offset))
   }
   handleUnexpectedToken(String.fromCharCode(charCode))
@@ -411,7 +491,7 @@ function scanOtherToken (charCode, peekCharCode) {
 // Script names:       [a-z_] ( *[-] *) [a-z_0-9]*
 // Converted literals: true, false and undefined
 
-function scanIdentifierOrKeyword () {
+function scanIdentifierOrKeyword() {
   const startsWithDollar = input.charCodeAt(offset) === 36 // $
   let value, type
 
@@ -421,11 +501,13 @@ function scanIdentifierOrKeyword () {
     let charCode, space, dash
     for (;;) {
       charCode = input.charCodeAt(++offset)
-      if (charCode === 32 || charCode === 9) { // [ ] \t
+      if (charCode === 32 || charCode === 9) {
+        // [ ] \t
         space = true
         continue
       }
-      if (charCode === 45) { // -
+      if (charCode === 45) {
+        // -
         dash = true
         continue
       }
@@ -450,7 +532,8 @@ function scanIdentifierOrKeyword () {
     const nameStart = offset
     while (isIdentifierPart(input.charCodeAt(offset))) ++offset
     // Dollar-signs are a part of the identifier, whitespace is not
-    value = input.slice(tokenStart, nameStart).replace(/ /g, '') +
+    value =
+      input.slice(tokenStart, nameStart).replace(/ /g, '') +
       input.slice(nameStart, offset).toLowerCase()
   } else {
     while (isIdentifierPart(input.charCodeAt(++offset)));
@@ -477,11 +560,12 @@ function scanIdentifierOrKeyword () {
 
 // #' .* '#
 
-function scanHashQuote () {
+function scanHashQuote() {
   offset += 2 // #'
   for (;;) {
     const charCode = input.charCodeAt(offset++)
-    if (charCode === 39 && input.charCodeAt(offset) === 35) { // '#
+    if (charCode === 39 && input.charCodeAt(offset) === 35) {
+      // '#
       ++offset
       break
     }
@@ -496,25 +580,25 @@ function scanHashQuote () {
 
 // # [0-9a-f]+
 
-function scanObjRef () {
+function scanObjRef() {
   const stringStart = ++offset // #
-  while (isHexadecimalDigit((input.charCodeAt(offset)))) ++offset
+  while (isHexadecimalDigit(input.charCodeAt(offset))) ++offset
   const value = parseInt(input.slice(stringStart, offset), 16)
   return placeToken({ type: ObjRef, value })
 }
 
 // & [0-9a-f]+
 
-function scanLegacyAlias () {
+function scanLegacyAlias() {
   const stringStart = ++offset // &
-  while (isHexadecimalDigit((input.charCodeAt(offset)))) ++offset
+  while (isHexadecimalDigit(input.charCodeAt(offset))) ++offset
   const value = parseInt(input.slice(stringStart, offset), 16)
   return placeToken({ type: LegacyAlias, value })
 }
 
 // [:symbol:]
 
-function scanPunctuator (value) {
+function scanPunctuator(value) {
   offset += value.length
   return placeToken({ type: Punctuator, value })
 }
@@ -523,7 +607,7 @@ function scanPunctuator (value) {
 // Single-line: " .* "
 // Multi-line:  ` .* `
 
-function scanStringLiteral (multiline) {
+function scanStringLiteral(multiline) {
   const delimiter = input.charCodeAt(offset++)
   const beginLine = line
   const beginLineStart = lineStart
@@ -541,7 +625,8 @@ function scanStringLiteral (multiline) {
         string += input.slice(stringStart, offset)
         stringStart = ++offset
         break
-      case 10: case 13:
+      case 10:
+      case 13:
         // Count two characters \r\n as one line break
         if (charCode === 13 && input.charCodeAt(offset) === 10) ++offset
         ++line
@@ -553,7 +638,8 @@ function scanStringLiteral (multiline) {
         }
     }
     if (offset > length) {
-      if (multiline) throwError(token, messages.unfinishedLongString, beginLineStart, getTokenText(token))
+      if (multiline)
+        throwError(token, messages.unfinishedLongString, beginLineStart, getTokenText(token))
       throwError(null, messages.unfinishedString, input.slice(tokenStart, offset - 1))
     }
   }
@@ -580,26 +666,31 @@ function scanStringLiteral (multiline) {
 // Real: [0-9](\.[0-9]+)?(e[-+]p0-9]+)?
 // Date: [0-9]{4}-[0-9]{2}}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}
 
-function scanNumericOrDateLiteral (allowDate) {
+function scanNumericOrDateLiteral(allowDate) {
   let charCode, real
   while (isDecimalDigit((charCode = input.charCodeAt(offset)))) ++offset
   // Try a date literal at first
   const beforeDate = offset
-  if (charCode === 45 && allowDate) { // -
+  if (charCode === 45 && allowDate) {
+    // -
     ++offset
     while (isDecimalDigit((charCode = input.charCodeAt(offset)))) ++offset
-    if (charCode === 45) { // -
+    if (charCode === 45) {
+      // -
       ++offset
       while (isDecimalDigit((charCode = input.charCodeAt(offset)))) ++offset
-      if (charCode === 84) { // T
+      if (charCode === 84) {
+        // T
         ++offset
         while (isDecimalDigit((charCode = input.charCodeAt(offset)))) ++offset
-        if (charCode !== 58) { // :
+        if (charCode !== 58) {
+          // :
           throwError(null, messages.malformedDate, input.slice(tokenStart, offset))
         }
         ++offset
         while (isDecimalDigit((charCode = input.charCodeAt(offset)))) ++offset
-        if (charCode !== 58) { // :
+        if (charCode !== 58) {
+          // :
           throwError(null, messages.malformedDate, input.slice(tokenStart, offset))
         }
         ++offset
@@ -611,14 +702,16 @@ function scanNumericOrDateLiteral (allowDate) {
     offset = beforeDate
   }
   // Fraction part is optional
-  if (charCode === 46) { // .
+  if (charCode === 46) {
+    // .
     real = true
     ++offset
     // Fraction part defaults to 0
     while (isDecimalDigit((charCode = input.charCodeAt(offset)))) ++offset
   }
   // Exponent is optional
-  if (charCode === 101 || charCode === 69) { // e or E
+  if (charCode === 101 || charCode === 69) {
+    // e or E
     real = true
     ++offset
     // Sign is optional
@@ -650,7 +743,7 @@ let includeComments
 // Single-line: // .*
 // Multi-line:  /* .* */
 
-function scanComment (multiline, notify) {
+function scanComment(multiline, notify) {
   const lineStartComment = lineStart
   const lineComment = line
 
@@ -674,7 +767,7 @@ function scanComment (multiline, notify) {
 
 // // .*
 
-function scanSingleLineComment () {
+function scanSingleLineComment() {
   const commentStart = offset
 
   while (offset < length) {
@@ -687,7 +780,7 @@ function scanSingleLineComment () {
 
 // /* .* */
 
-function scanMultilineComment () {
+function scanMultilineComment() {
   const commentLine = line
   const commentStart = offset
   let charCode
@@ -696,12 +789,14 @@ function scanMultilineComment () {
     charCode = input.charCodeAt(offset++)
     switch (charCode) {
       case 42: // *
-        if (input.charCodeAt(offset) === 47) { // /
+        if (input.charCodeAt(offset) === 47) {
+          // /
           ++offset
           return [commentStart + 2, offset - 2]
         }
         break
-      case 10: case 13:
+      case 10:
+      case 13:
         // Count two characters \r\n as a single line break.
         if (charCode === 13 && input.charCodeAt(offset) === 10) ++offset
         ++line
@@ -719,10 +814,10 @@ let defines // map of name-value pairs of preprocessor variables
 // Defining variables:  # (define|undef) NAME [VALUE]
 // Conditional content: # (ifdef|ifndef) .* [#else .*] .* #endif
 
-function scanPreprocessorDirective (full) {
+function scanPreprocessorDirective(full) {
   const comments = []
   let offsetComment, lineStartComment, lineComment, asterisk
-  const directiveOffset = tokenStart = offset
+  const directiveOffset = (tokenStart = offset)
   const startOffset = ++offset // #
 
   out: while (offset < length) {
@@ -748,7 +843,8 @@ function scanPreprocessorDirective (full) {
         comments.unshift([offsetComment - startOffset, offset - startOffset])
         continue
 
-      case 10: case 13:
+      case 10:
+      case 13:
         break out
     }
     ++offset
@@ -766,20 +862,22 @@ function scanPreprocessorDirective (full) {
 
   const result = executePreprocessorDirective(type, name, value)
   if ((full || result === true) && onCreateToken && includePreprocessor) {
-    onCreateToken(placeToken({
-      type: PreprocessorDirective,
-      value: content,
-      directive: type,
-      name,
-      namedValue: value
-    }))
+    onCreateToken(
+      placeToken({
+        type: PreprocessorDirective,
+        value: content,
+        directive: type,
+        name,
+        namedValue: value
+      })
+    )
   }
   return result
 }
 
 // (define|undef|ifdef|ifndef|else|endif) [:name:] [:value:]
 
-function splitFullPreprocessorDirective (content) {
+function splitFullPreprocessorDirective(content) {
   let [, type, name, value] = /^\s*(\w+)(?:\s+(\w+))?(?:\s*(.+))?\s*$/.exec(content) || []
   if (!type) {
     throwError(null, messages.unfinishedPrepDirective, line, input.slice(tokenStart, offset - 1))
@@ -800,20 +898,26 @@ function splitFullPreprocessorDirective (content) {
       // Be as forgiving as the OScript VM, although the language specification
       // requires a name for a ifdef or ifndef directives
       const result = placeToken({ type: PreprocessorDirective, value: content })
-      warnings.push(createErrorForToken(result, true, messages.prepDirectiveWithoutName, type, content))
+      warnings.push(
+        createErrorForToken(result, true, messages.prepDirectiveWithoutName, type, content)
+      )
     }
     if (value && (type === 'ifdef' || type === 'ifndef')) {
       // Be as forgiving as the OScript VM, although the language specification
       // forbids anything to follow "ifdef|ifndef <name>"
       const result = placeToken({ type: PreprocessorDirective, value: content })
-      warnings.push(createErrorForToken(result, true, messages.charactersAfterPrepDirective, type, content))
+      warnings.push(
+        createErrorForToken(result, true, messages.charactersAfterPrepDirective, type, content)
+      )
     }
   } else if (type === 'else' || type === 'endif') {
     if (name || value) {
       // Be as forgiving as the OScript VM, although the language specification
       // forbids anything to follow else or endif directives
       const result = placeToken({ type: PreprocessorDirective, value: content })
-      warnings.push(createErrorForToken(result, true, messages.charactersAfterPrepDirective, type, content))
+      warnings.push(
+        createErrorForToken(result, true, messages.charactersAfterPrepDirective, type, content)
+      )
     }
   } else {
     throwError(null, messages.unfinishedPrepDirective, line, input.slice(tokenStart, offset - 1))
@@ -823,7 +927,7 @@ function splitFullPreprocessorDirective (content) {
 
 // (else|endif)
 
-function trySplitPartialPreprocessorDirective (content) {
+function trySplitPartialPreprocessorDirective(content) {
   let [, type, rest] = /^\s*(\w+)?(?:\s*(.+))?\s*$/.exec(content) || []
   if (!type) return []
   type = type.toLowerCase()
@@ -832,12 +936,14 @@ function trySplitPartialPreprocessorDirective (content) {
     // Be as forgiving as the OScript VM, although the language specification
     // forbids anything to follow else or endif directives
     const result = placeToken({ type: PreprocessorDirective, value: content })
-    warnings.push(createErrorForToken(result, true, messages.charactersAfterPrepDirective, type, content))
+    warnings.push(
+      createErrorForToken(result, true, messages.charactersAfterPrepDirective, type, content)
+    )
   }
   return [type]
 }
 
-function executePreprocessorDirective (directive, name, value) {
+function executePreprocessorDirective(directive, name, value) {
   const prevIncludeContent = enableTokenization
   if (directive === 'define') {
     defines.set(name, value.replace(/^'|"/, '').replace(/'|"$/, ''))
@@ -849,7 +955,8 @@ function executePreprocessorDirective (directive, name, value) {
     enterIncludeScope(!defines.has(name))
   } else if (directive === 'else') {
     flipIncludeScope()
-  } else { // endif
+  } else {
+    // endif
     leaveIncludeScope()
   }
   // Report only state changes by true - include or false - exclude the source
@@ -858,15 +965,15 @@ function executePreprocessorDirective (directive, name, value) {
 
 // ---------- Preprocessor directive scoping
 
-let includeScope    // if the current ifdef|ifndef|else region evaluated to true
+let includeScope // if the current ifdef|ifndef|else region evaluated to true
 let inclusionScopes // array all nested ifdef|ifndef scopes so far
-let tokenBackup     // the last token before a preprocessor scope to ignore started
+let tokenBackup // the last token before a preprocessor scope to ignore started
 let prevTokenBackup // the last previousToken before a preprocessor scope to ignore started
 let nextTokenBackup // the last nextToken before a preprocessor scope to ignore started
 
 // After ifdef or ifndef
 
-function enterIncludeScope (_include) {
+function enterIncludeScope(_include) {
   inclusionScopes.push(includeScope)
   includeScope = _include
   updateIncludeScope()
@@ -874,7 +981,7 @@ function enterIncludeScope (_include) {
 
 // After endif
 
-function leaveIncludeScope () {
+function leaveIncludeScope() {
   checkIncludeScope()
   includeScope = inclusionScopes.pop()
   updateIncludeScope()
@@ -882,19 +989,19 @@ function leaveIncludeScope () {
 
 // After else
 
-function flipIncludeScope () {
+function flipIncludeScope() {
   checkIncludeScope()
   includeScope = !includeScope
   updateIncludeScope()
 }
 
-function checkIncludeScope () {
+function checkIncludeScope() {
   if (inclusionScopes.length === 0) {
     throwError(null, messages.unfinishedPrepDirective, line, input.slice(tokenStart, offset - 1))
   }
 }
 
-function updateIncludeScope () {
+function updateIncludeScope() {
   const prevEnableTokenization = enableTokenization
   enableTokenization = includeScope && inclusionScopes.every(scope => scope)
   if (prevEnableTokenization !== enableTokenization) {
@@ -916,7 +1023,7 @@ function updateIncludeScope () {
 
 // ---------- Lexing helpers
 
-function placeToken (token) {
+function placeToken(token) {
   token.line = token.lastLine = line
   token.lineStart = token.lastLineStart = lineStart
   token.range = [tokenStart, offset]
@@ -927,7 +1034,7 @@ function placeToken (token) {
 // ============================================================
 // Parser
 
-let token     // the current token scheduled for processing
+let token // the current token scheduled for processing
 let prevToken // the token processed before the current one
 let nextToken // the token that will be processed after the current one
 
@@ -935,13 +1042,13 @@ let nextToken // the token that will be processed after the current one
 
 let advanceToNextToken // function returning a next token to be processed
 
-function advanceToNextTokenFromInput () {
+function advanceToNextTokenFromInput() {
   prevToken = token
   token = nextToken
   nextToken = getTokenFromInput()
 }
 
-function advanceToNextTokenFromTokens () {
+function advanceToNextTokenFromTokens() {
   prevToken = token
   token = nextToken
   nextToken = getTokenFromTokens()
@@ -949,7 +1056,7 @@ function advanceToNextTokenFromTokens () {
 
 // Gets a new token from the input token array insted of the input text.
 
-function getTokenFromTokens () {
+function getTokenFromTokens() {
   // An array of tokens does nto include an explicit <eof> token
   if (offset >= length) return placeToken({ type: EOF, value: '<eof>' })
   return tokens[offset++]
@@ -958,7 +1065,7 @@ function getTokenFromTokens () {
 // Consumes a token if its value matches the expected one and advance to
 // the next one. Once consumed or not, returns the success of the operation.
 
-function consumePunctuator (value) {
+function consumePunctuator(value) {
   if (token.type === Punctuator && value === token.value) {
     advanceToNextToken()
     return true
@@ -966,7 +1073,7 @@ function consumePunctuator (value) {
   return false
 }
 
-function consumeKeyword (value) {
+function consumeKeyword(value) {
   if (token.type & KeywordOrIdentifier && value === token.value) {
     advanceToNextToken()
     return true
@@ -977,17 +1084,17 @@ function consumeKeyword (value) {
 // Expects the next token value to match the specified one and advances to
 // the next one if it does. If not, throws an exception.
 
-function expectPunctuator (value) {
+function expectPunctuator(value) {
   if (token.type === Punctuator && value === token.value) advanceToNextToken()
   else throwError(token, messages.expected, value, getTokenText(token))
 }
 
-function expectKeyword (value) {
+function expectKeyword(value) {
   if (token.type & KeywordOrIdentifier && value === token.value) advanceToNextToken()
   else throwError(token, messages.expected, value, getTokenText(token))
 }
 
-function requirePrecedingLineBreak () {
+function requirePrecedingLineBreak() {
   if (!token.afterLineBreak) {
     throwError(token, messages.expected, 'line break', getTokenText(token))
   }
@@ -996,12 +1103,12 @@ function requirePrecedingLineBreak () {
 // Expects either a line break occurring after the current statement,
 // or a semicolon (;) to end it before the next statement can be parsed.
 
-function advanceToNextStatement () {
+function advanceToNextStatement() {
   if (token.afterLineBreak) return
   expectPunctuator(';')
 }
 
-function canAdvanceToNextStatement () {
+function canAdvanceToNextStatement() {
   if (token.afterLineBreak) return true
   return consumePunctuator(';')
 }
@@ -1009,14 +1116,14 @@ function canAdvanceToNextStatement () {
 // ---------- Location tracking
 
 let locationsOrRanges // if locations or ranges should be stored in parsed nodes
-let includeLocations  // if locations should be stored in parsed nodes
-let includeRanges     // if ranges should be stored in parsed nodes
-let onCreateNode      // callback for getting informed about any new parsed node
+let includeLocations // if locations should be stored in parsed nodes
+let includeRanges // if ranges should be stored in parsed nodes
+let onCreateNode // callback for getting informed about any new parsed node
 
 // Optionally sets the location and range on the parsed node and notifies
 // the caller that a new parsed node was created.
 
-function placeNode (node, startToken) {
+function placeNode(node, startToken) {
   if (locationsOrRanges) {
     if (includeLocations) {
       node.loc = {
@@ -1037,21 +1144,27 @@ function placeNode (node, startToken) {
 }
 
 let includeRawIdentifiers // if the raw identifier content should be included
-let includeRawLiterals    // if the raw literal content should be included
+let includeRawLiterals // if the raw literal content should be included
 let sourceType // the type of the source code - script, object or dump
 let oldVersion // if the old language version (before objects) should be parsed
 
 // <Program> ::=
 //   <PackageDeclaration> | <ScriptSource> | <DumpSource>
 
-function parseProgram () {
+function parseProgram() {
   advanceToNextToken() // <bof>
   const startToken = token
   let body
   switch (sourceType) {
-    case 'object': body = parsePackageDeclaration(); break
-    case 'script': body = parseScriptSource(); break
-    case 'dump': body = parseDumpSource(); break
+    case 'object':
+      body = parsePackageDeclaration()
+      break
+    case 'script':
+      body = parseScriptSource()
+      break
+    case 'dump':
+      body = parseDumpSource()
+      break
   }
   if (EOF !== token.type) handleUnexpectedToken(token)
   return placeNode(ast.program(body), startToken)
@@ -1061,7 +1174,7 @@ function parseProgram () {
 //   "package" <ObjectName>
 //   <ObjectDeclaration>
 
-function parsePackageDeclaration () {
+function parsePackageDeclaration() {
   const startToken = token
   expectKeyword('package')
   const name = parseObjectName()
@@ -1073,7 +1186,7 @@ function parsePackageDeclaration () {
 //   <Statement>*
 //   <FunctionDeclaration>*
 
-function parseScriptSource () {
+function parseScriptSource() {
   const startToken = token
   const body = []
   let encounteredFunction
@@ -1100,7 +1213,7 @@ function parseScriptSource () {
 //   "set" <Identifier> "=" <Literal> *
 //   <ScriptDeclaration>*
 
-function parseDumpSource () {
+function parseDumpSource() {
   const startToken = token
   expectKeyword('name')
   convertSpecialLiteralsToIdentifier()
@@ -1132,7 +1245,7 @@ function parseDumpSource () {
 //   [<Modifier>] <FunctionDeclaration> | <ScriptDeclaration> | <FeatureDeclaration> *
 //   "end"
 
-function parseObjectDeclaration () {
+function parseObjectDeclaration() {
   const startToken = token
   // Objects are specified to be public only, but the OScript VM is forgiving
   // and accepts at least the "override" modifier too
@@ -1150,7 +1263,8 @@ function parseObjectDeclaration () {
   requirePrecedingLineBreak()
   const body = []
   while (!consumeKeyword('end')) {
-    if (!(token.type & KeywordOrIdentifier)) handleUnexpectedToken(token, '<modifier>, <type>, function, script or end')
+    if (!(token.type & KeywordOrIdentifier))
+      handleUnexpectedToken(token, '<modifier>, <type>, function, script or end')
     const startToken = token
     const modifier = tryModifier()
     if (!(token.type & KeywordOrIdentifier)) {
@@ -1178,7 +1292,9 @@ function parseObjectDeclaration () {
       // Be as forgiving as the OScript VM, although the language specification
       // allows semicolons (;) only after statements
       warnings.push(createErrorForToken(prevToken, true, messages.unexpectedSemicolon, member, ';'))
-      do { body.push(parseEmptyStatement()) } while (consumePunctuator(';'))
+      do {
+        body.push(parseEmptyStatement())
+      } while (consumePunctuator(';'))
     }
   }
   return placeNode(ast.objectDeclaration(id, modifier, superObject, body), startToken)
@@ -1187,7 +1303,7 @@ function parseObjectDeclaration () {
 // <ObjectDeclaration> ::=
 //   <Type> <Identifier> | <HashQuote> ["=" <Expression>]
 
-function parseFeatureDeclaration (startToken, modifier) {
+function parseFeatureDeclaration(startToken, modifier) {
   const type = checkType()
   const id = parseIdentifierOrHashQuote()
   let init
@@ -1201,7 +1317,7 @@ function parseFeatureDeclaration (startToken, modifier) {
 //   <Statement>*
 //   "end"
 
-function parseFunctionDeclaration (startToken, modifier) {
+function parseFunctionDeclaration(startToken, modifier) {
   let nodebug
   if (token.type === Keyword && token.value === 'nodebug') {
     advanceToNextToken()
@@ -1228,13 +1344,16 @@ function parseFunctionDeclaration (startToken, modifier) {
   while (!consumeKeyword('end')) {
     body.push(parseStatement())
   }
-  return placeNode(ast.functionDeclaration(id, type, modifier, parameters, variadic, nodebug, body), startToken)
+  return placeNode(
+    ast.functionDeclaration(id, type, modifier, parameters, variadic, nodebug, body),
+    startToken
+  )
 }
 
 // <Parameter> ::=
 //   [<Type>] <Identifier> ["=" <Expression>]
 
-function parseParameter () {
+function parseParameter() {
   const startToken = token
   let type = tryType()
   let id
@@ -1255,7 +1374,7 @@ function parseParameter () {
 //   <Statement> | <FunctionDeclaration> *
 //   "endscript" | "scriptend"
 
-function parseScriptDeclaration (startToken, modifier) {
+function parseScriptDeclaration(startToken, modifier) {
   const id = parseIdentifierOrHashQuote()
   requirePrecedingLineBreak()
   const body = []
@@ -1266,7 +1385,8 @@ function parseScriptDeclaration (startToken, modifier) {
           advanceToNextToken()
           body.push(parseFunctionDeclaration(prevToken))
           continue
-        case 'endscript': case 'scriptend':
+        case 'endscript':
+        case 'scriptend':
           requirePrecedingLineBreak()
           advanceToNextToken()
           break out
@@ -1288,25 +1408,39 @@ function parseScriptDeclaration (startToken, modifier) {
 //   <Expression> |
 //   <EmptyStatement>
 
-function parseStatement () {
-  if (token.type & KeywordOrIdentifier &&
-      nextToken.type === Punctuator && nextToken.value === ':') {
+function parseStatement() {
+  if (
+    token.type & KeywordOrIdentifier &&
+    nextToken.type === Punctuator &&
+    nextToken.value === ':'
+  ) {
     return parseLabel()
   }
 
   if (Keyword === token.type) {
     switch (token.value) {
-      case 'if': return parseIfStatement()
-      case 'switch': return parseSwitchStatement()
-      case 'while': return parseWhileStatement()
-      case 'repeat': return parseRepeatStatement()
-      case 'for': return parseForStatements()
-      case 'goto': return parseGotoStatement()
-      case 'return': return parseReturnStatement()
-      case 'break': return parseBreakStatement()
-      case 'continue': return parseContinueStatement()
-      case 'breakif': return parseBreakIfStatement()
-      case 'continueif': return parseContinueIfStatement()
+      case 'if':
+        return parseIfStatement()
+      case 'switch':
+        return parseSwitchStatement()
+      case 'while':
+        return parseWhileStatement()
+      case 'repeat':
+        return parseRepeatStatement()
+      case 'for':
+        return parseForStatements()
+      case 'goto':
+        return parseGotoStatement()
+      case 'return':
+        return parseReturnStatement()
+      case 'break':
+        return parseBreakStatement()
+      case 'continue':
+        return parseContinueStatement()
+      case 'breakif':
+        return parseBreakIfStatement()
+      case 'continueif':
+        return parseContinueIfStatement()
     }
   }
 
@@ -1321,14 +1455,14 @@ function parseStatement () {
 // <EmptyStatement> ::=
 //   ";"
 
-function parseEmptyStatement () {
+function parseEmptyStatement() {
   return placeNode(ast.emptyStatement(), prevToken)
 }
 
 // <VariableDeclaration> ::=
 //   <Type> [<Identifier> ["=" <Expression>] [","]?]+
 
-function parseVariableDeclaration (type) {
+function parseVariableDeclaration(type) {
   const startToken = prevToken
   const variables = []
   do {
@@ -1347,7 +1481,7 @@ function parseVariableDeclaration (type) {
 //   ["else" <Statement>*]
 //   "end"
 
-function parseIfStatement () {
+function parseIfStatement() {
   const startToken = token
   advanceToNextToken() // if
   const test = parseExpression()
@@ -1383,13 +1517,16 @@ function parseIfStatement () {
     statements.push(parseStatement())
   }
 
-  function savePrevClause () {
-    if (!consequent) { // after the (first) if clause
+  function savePrevClause() {
+    if (!consequent) {
+      // after the (first) if clause
       consequent = statements
-    } else if (otherTest) { // after an elseif clause
+    } else if (otherTest) {
+      // after an elseif clause
       otherClauses.push(placeNode(ast.elseifClause(otherTest, statements), otherToken))
       otherTest = undefined
-    } else { // after the (last) else clause
+    } else {
+      // after the (last) else clause
       alternate = statements
     }
   }
@@ -1401,7 +1538,7 @@ function parseIfStatement () {
 //   ["default" <Statement>* "end"]
 //   "end"
 
-function parseSwitchStatement () {
+function parseSwitchStatement() {
   const startToken = token
   advanceToNextToken() // switch
   const discriminant = parseExpression()
@@ -1415,7 +1552,9 @@ function parseSwitchStatement () {
         case 'case':
           if (defaultCase) throwError(token, messages.expected, 'end', getTokenText(token))
           startCase()
-          do { tests.push(parseExpression()) } while (consumePunctuator(','))
+          do {
+            tests.push(parseExpression())
+          } while (consumePunctuator(','))
           break
         case 'default':
           startCase()
@@ -1439,7 +1578,7 @@ function parseSwitchStatement () {
     statements.push(parseStatement())
   }
 
-  function startCase () {
+  function startCase() {
     savePrevCase()
     caseToken = token
     advanceToNextToken()
@@ -1448,13 +1587,13 @@ function parseSwitchStatement () {
     caseOrDefault = true
   }
 
-  function endCase () {
+  function endCase() {
     savePrevCase()
     caseOrDefault = false
     advanceToNextToken()
   }
 
-  function savePrevCase () {
+  function savePrevCase() {
     if (caseOrDefault) {
       cases.push(placeNode(ast.switchCase(tests, statements), caseToken))
     }
@@ -1465,7 +1604,7 @@ function parseSwitchStatement () {
 //   "while" <Expression>
 //   <LoopBody>
 
-function parseWhileStatement () {
+function parseWhileStatement() {
   const startToken = token
   advanceToNextToken() // while
   const test = parseExpression()
@@ -1479,7 +1618,7 @@ function parseWhileStatement () {
 //   <Statement>*
 //   "until" <Expression>
 
-function parseRepeatStatement () {
+function parseRepeatStatement() {
   const startToken = token
   advanceToNextToken() // repeat
   advanceToNextStatement()
@@ -1496,7 +1635,7 @@ function parseRepeatStatement () {
 // <ForStatements> ::=
 //   <ForStatement> | <ForEachStatement> | <StructuredForStatement>
 
-function parseForStatements () {
+function parseForStatements() {
   const startToken = token
   advanceToNextToken() // for
   if (consumePunctuator('(')) return parseForStatement(startToken)
@@ -1510,7 +1649,7 @@ function parseForStatements () {
 //   "for" "(" [<Expression>] ";" [<Expression>] ";" [<Expression>] ")"
 //   <LoopBody>
 
-function parseForStatement (startToken) {
+function parseForStatement(startToken) {
   let init, test, update
   if (!canAdvanceToNextStatement()) {
     init = parseExpression()
@@ -1527,7 +1666,9 @@ function parseForStatement (startToken) {
   if (!canAdvanceToNextStatement()) {
     // Be as forgiving as the OScript VM, although the language specification
     // requires a line break or a semicolon (;) after the for statement
-    warnings.push(createErrorForToken(prevToken, true, messages.unfinishedStatement, 'for', String(token.value)))
+    warnings.push(
+      createErrorForToken(prevToken, true, messages.unfinishedStatement, 'for', String(token.value))
+    )
   }
   return placeNode(ast.forStatement(init, test, update, parseLoopBody()), startToken)
 }
@@ -1536,7 +1677,7 @@ function parseForStatement (startToken) {
 //   "for" <Identifier> "in" <Expression>
 //   <LoopBody>
 
-function parseForEachStatement (startToken, left) {
+function parseForEachStatement(startToken, left) {
   const right = parseExpression()
   advanceToNextStatement()
   return placeNode(ast.forEachStatement(left, right, parseLoopBody()), startToken)
@@ -1547,7 +1688,7 @@ function parseForEachStatement (startToken, left) {
 //     ["by" <Expression>]
 //   <LoopBody>
 
-function parseStructuredForStatement (startToken, variable) {
+function parseStructuredForStatement(startToken, variable) {
   const start = parseExpression()
   let down
   if (consumeKeyword('downto')) {
@@ -1567,7 +1708,7 @@ function parseStructuredForStatement (startToken, variable) {
 //   <Statement>*
 //   "end"
 
-function parseLoopBody () {
+function parseLoopBody() {
   const body = []
   while (!consumeKeyword('end')) body.push(parseStatement())
   return body
@@ -1576,7 +1717,7 @@ function parseLoopBody () {
 // <GotoStatement> ::=
 //   "goto" <Identifier>
 
-function parseGotoStatement () {
+function parseGotoStatement() {
   const startToken = token
   advanceToNextToken() // goto
   const label = parseIdentifier()
@@ -1586,7 +1727,7 @@ function parseGotoStatement () {
 // <Label> ::=
 //   <Identifier> ":"
 
-function parseLabel () {
+function parseLabel() {
   const startToken = token
   const id = parseIdentifier()
   advanceToNextToken() // :
@@ -1596,23 +1737,24 @@ function parseLabel () {
 // <ReturnStatement> ::=
 //   "return" [<Expression>]
 
-function parseReturnStatement () {
+function parseReturnStatement() {
   const startToken = token
   advanceToNextToken() // return
   // If a value should be returned, it has to follow the return keyword
   // on the same line, otherwise it will become the next statement and
   // an unreachable code. A semicolon can end the return statement without
   // returning a value too.
-  const argument = token.afterLineBreak || (token.type === Punctuator && token.value === ';')
-    ? undefined
-    : parseExpression()
+  const argument =
+    token.afterLineBreak || (token.type === Punctuator && token.value === ';')
+      ? undefined
+      : parseExpression()
   return placeNode(ast.returnStatement(argument), startToken)
 }
 
 // <BreakStatement> ::=
 //   "break"
 
-function parseBreakStatement () {
+function parseBreakStatement() {
   advanceToNextToken() // break
   return placeNode(ast.breakStatement(), prevToken)
 }
@@ -1620,7 +1762,7 @@ function parseBreakStatement () {
 // <ContinueStatement> ::=
 //   "continue"
 
-function parseContinueStatement () {
+function parseContinueStatement() {
   advanceToNextToken() // continue
   return placeNode(ast.continueStatement(), prevToken)
 }
@@ -1628,7 +1770,7 @@ function parseContinueStatement () {
 // <BreakIfStatement> ::=
 //   "breakif" <Expression>
 
-function parseBreakIfStatement () {
+function parseBreakIfStatement() {
   const startToken = token
   advanceToNextToken() // breakif
   const test = parseExpression()
@@ -1638,7 +1780,7 @@ function parseBreakIfStatement () {
 // <ContinueIfStatement> ::=
 //   "continueif" <Expression>
 
-function parseContinueIfStatement () {
+function parseContinueIfStatement() {
   const startToken = token
   advanceToNextToken() // continueif
   const test = parseExpression()
@@ -1650,18 +1792,23 @@ function parseContinueIfStatement () {
 //   <ListExpressionOrComprehension> | <AssocExpression> |
 //   <SpecialIdentifier> | <ObjectName> | <Literal>
 
-function parsePrimaryExpression () {
+function parsePrimaryExpression() {
   const tokenType = token.type
   if (tokenType === Punctuator) {
     switch (token.value) {
-      case '[': return parseXlate()
-      case '{': return parseListExpressionOrComprehension()
-      case '(': return parseParenthesisExpression()
+      case '[':
+        return parseXlate()
+      case '{':
+        return parseListExpressionOrComprehension()
+      case '(':
+        return parseParenthesisExpression()
     }
   } else if (tokenType & KeywordOrIdentifier) {
     switch (token.value) {
-      case 'this': return parseSpecialIdentifier('thisExpression')
-      case 'super': return parseSpecialIdentifier('superExpression')
+      case 'this':
+        return parseSpecialIdentifier('thisExpression')
+      case 'super':
+        return parseSpecialIdentifier('superExpression')
       case 'assoc':
         if (nextToken.type === Punctuator && nextToken.value === '{') {
           return parseAssocExpression()
@@ -1675,7 +1822,8 @@ function parsePrimaryExpression () {
 // <SpecialIdentifier> ::=
 //   "this" | "super"
 
-function parseSpecialIdentifier (type) { // thisExpression or superExpression
+function parseSpecialIdentifier(type) {
+  // thisExpression or superExpression
   advanceToNextToken() // this or super
   return placeNode(ast[type](), prevToken)
 }
@@ -1684,22 +1832,27 @@ function parseSpecialIdentifier (type) { // thisExpression or superExpression
 //   "{" [<ListElement>] ["," <ListElement>]* |
 //       ["for" <Identifier> "in" <Expression> ["if" <Expression>]] "}"
 
-function parseListExpressionOrComprehension () {
+function parseListExpressionOrComprehension() {
   const startToken = token
   advanceToNextToken() // {
-  if (consumePunctuator('}')) { // an empty list
+  if (consumePunctuator('}')) {
+    // an empty list
     return placeNode(ast.listExpression([]), startToken)
   }
   const firstElement = parseListElement()
-  if (consumePunctuator('}')) { // a list with a single item
+  if (consumePunctuator('}')) {
+    // a list with a single item
     return placeNode(ast.listExpression([firstElement]), startToken)
   }
-  if (consumePunctuator(',')) { // a list with more than one item
+  if (consumePunctuator(',')) {
+    // a list with more than one item
     for (const elements = [firstElement]; ;) {
       elements.push(parseListElement())
       if (token.type === Punctuator) {
         switch (token.value) {
-          case ',': advanceToNextToken(); continue
+          case ',':
+            advanceToNextToken()
+            continue
           case '}':
             advanceToNextToken()
             return placeNode(ast.listExpression(elements), startToken)
@@ -1722,7 +1875,7 @@ function parseListExpressionOrComprehension () {
 // <ListElement> ::=
 // ["@"] <Expression>
 
-function parseListElement () {
+function parseListElement() {
   if (consumePunctuator('@')) {
     const startToken = prevToken
     return placeNode(ast.atExpression(parseExpression()), startToken)
@@ -1733,7 +1886,7 @@ function parseListElement () {
 // <AssocExpression> ::=
 //   "assoc{" [<Expression> ":" <Expression> [","]]* "}"
 
-function parseAssocExpression () {
+function parseAssocExpression() {
   const startToken = token
   advanceToNextToken() // assoc
   advanceToNextToken() // {
@@ -1752,7 +1905,7 @@ function parseAssocExpression () {
 // <ParenthesisExpression> ::=
 //   "(" <Expression> ")"
 
-function parseParenthesisExpression () {
+function parseParenthesisExpression() {
   const startToken = token
   advanceToNextToken() // (
   const expression = parseExpression()
@@ -1764,7 +1917,7 @@ function parseParenthesisExpression () {
 //   [<PrimaryExpression>]
 //   [[<MemberExpression>] [<SliceExpression>] [<CallExpression>]]*
 
-function parseMemberSliceCallExpression (startToken = token) {
+function parseMemberSliceCallExpression(startToken = token) {
   let left = consumePunctuator('.') // a starting dot alone dereferences this
     ? parseMemberExpression(startToken, placeNode(ast.thisExpression(), prevToken))
     : parsePrimaryExpression()
@@ -1784,7 +1937,7 @@ function parseMemberSliceCallExpression (startToken = token) {
 // <MemberExpression> ::=
 //   "." ["(" <Expression> ")"] | <Identifier> | <StringLiteral>
 
-function parseMemberExpression (startToken, object) {
+function parseMemberExpression(startToken, object) {
   if (consumePunctuator('(')) {
     const startToken = prevToken
     const property = parseExpression()
@@ -1796,7 +1949,8 @@ function parseMemberExpression (startToken, object) {
     property = parseMemberSliceCallExpression(startToken)
   } else {
     switch (token.type) {
-      case Keyword: case Identifier:
+      case Keyword:
+      case Identifier:
         property = parseIdentifier()
         break
       default: // StringLiteral
@@ -1810,15 +1964,18 @@ function parseMemberExpression (startToken, object) {
 // <SliceExpression> ::=
 //   "[" <Expression> | (<Expression> ":" [<Expression>]) | (":" <Expression>) "]"
 
-function parseSliceExpression (startToken, object) {
+function parseSliceExpression(startToken, object) {
   let start, end
-  if (consumePunctuator(':')) { // [ : 123 ]
+  if (consumePunctuator(':')) {
+    // [ : 123 ]
     end = parseExpression()
     expectPunctuator(']')
   } else {
     start = parseExpression()
-    if (consumePunctuator(':')) {  // [ 123 : ] or [ 123 : 456 ]
-      if (!consumePunctuator(']')) {  // [ 123 : 456 ]
+    if (consumePunctuator(':')) {
+      // [ 123 : ] or [ 123 : 456 ]
+      if (!consumePunctuator(']')) {
+        // [ 123 : 456 ]
         end = parseExpression()
         expectPunctuator(']')
       }
@@ -1826,15 +1983,16 @@ function parseSliceExpression (startToken, object) {
       expectPunctuator(']') // [ 123 ] (index, not slice)
     }
   }
-  return placeNode(end
-    ? ast.sliceExpression(object, start, end)
-    : ast.indexExpression(object, start), startToken)
+  return placeNode(
+    end ? ast.sliceExpression(object, start, end) : ast.indexExpression(object, start),
+    startToken
+  )
 }
 
 // <CallExpression> ::=
 //   "(" <Expression> ["," <Expression>]* ")"
 
-function parseCallExpression (startToken, callee) {
+function parseCallExpression(startToken, callee) {
   const args = []
   while (!consumePunctuator(')')) {
     if (args.length) expectPunctuator(',')
@@ -1846,7 +2004,7 @@ function parseCallExpression (startToken, callee) {
 // <UnaryExpression> ::=
 //   [<UnaryOperator>]+ <MemberSliceCallExpression>
 
-function parseUnaryExpression () {
+function parseUnaryExpression() {
   if (token.type & PunctuatorOrKeyword && isUnaryOperator(token.value)) {
     const startToken = token
     const operator = token.value
@@ -1860,12 +2018,14 @@ function parseUnaryExpression () {
 // <BinaryExpression> ::=
 //   <UnaryExpression> [<BinaryOperator> <UnaryExpression>]+
 
-function parseBinaryExpression () {
+function parseBinaryExpression() {
   const startToken = token
   let left = parseUnaryExpression()
   let operator, precedence, lastPrecedence
-  while ((token.type & PunctuatorOrKeyword) &&
-      (precedence = getOperatorPrecedence(operator = token.value))) {
+  while (
+    token.type & PunctuatorOrKeyword &&
+    (precedence = getOperatorPrecedence((operator = token.value)))
+  ) {
     advanceToNextToken()
     const right = parseUnaryExpression()
     if (precedence < lastPrecedence) {
@@ -1884,7 +2044,7 @@ function parseBinaryExpression () {
       // Create another operation with the previous operator, the left operand
       // from the previous operation and the right operand the previous
       // (already exchanged) operation result.
-      left = placeNode(ast.binaryExpression(operator = prevOperator, prevLeft, left), startToken)
+      left = placeNode(ast.binaryExpression((operator = prevOperator), prevLeft, left), startToken)
     } else {
       // If the current operation has the same or lower priority than
       // the previous one, it can be applied to the result of the previous
@@ -1899,7 +2059,7 @@ function parseBinaryExpression () {
 // <Expression> ::=
 //   <BinaryExpression> ["?" <Expression> ":" <Expression>]
 
-function parseExpression () {
+function parseExpression() {
   const test = parseBinaryExpression()
   if (consumePunctuator('?')) {
     const startToken = prevToken
@@ -1914,7 +2074,7 @@ function parseExpression () {
 // <Xlate> ::=
 //   "[" <Identifier> ":" <Identifier> "]"
 
-function parseXlate () {
+function parseXlate() {
   const startToken = token
   advanceToNextToken() // [
   const ospace = parseIdentifier()
@@ -1928,7 +2088,7 @@ function parseXlate () {
 // <ObjectName> ::=
 //   <Identifier> ["::" <IdentifierOrHashQuoteOrLegacyAlias>]*
 
-function parseObjectName (expression) {
+function parseObjectName(expression) {
   const startToken = token
   convertSpecialLiteralsToIdentifier()
   const name = [parseIdentifier()]
@@ -1945,7 +2105,7 @@ function parseObjectName (expression) {
 //   {($?$? *)? [a-z_] [a-z_0-9]*} |
 //   {[a-z_] ( *[-] *) [a-z_0-9]*} |
 
-function parseIdentifier () {
+function parseIdentifier() {
   if (!(token.type & KeywordOrIdentifier)) handleUnexpectedToken(token, '<identifier>')
   if (token.hashQuote) handleUnexpectedToken(token)
   return finishIdentifier()
@@ -1956,7 +2116,7 @@ function parseIdentifier () {
 //   {[a-z_] ( *[-] *) [a-z_0-9]*} |
 //   {#' .* '#}
 
-function parseIdentifierOrHashQuote () {
+function parseIdentifierOrHashQuote() {
   if (!(token.type & KeywordOrIdentifier)) handleUnexpectedToken(token, '<identifier>')
   return finishIdentifier()
 }
@@ -1967,31 +2127,35 @@ function parseIdentifierOrHashQuote () {
 //   {#' .* '#} |
 //   {& [0-9a-f]+}
 
-function parseIdentifierOrHashQuoteOrLegacyAlias () {
+function parseIdentifierOrHashQuoteOrLegacyAlias() {
   const tokenType = token.type
-  if (!(tokenType & KeywordOrIdentifier || tokenType === LegacyAlias)) handleUnexpectedToken(token, '<identifier>')
+  if (!(tokenType & KeywordOrIdentifier || tokenType === LegacyAlias))
+    handleUnexpectedToken(token, '<identifier>')
   return finishIdentifier()
 }
 
-function finishIdentifier () {
+function finishIdentifier() {
   advanceToNextToken() // identifier or hashquote or legacyalias
   return createIdentifier()
 }
 
-function createIdentifier () {
+function createIdentifier() {
   const raw = includeRawIdentifiers
     ? input.slice(prevToken.range[0], prevToken.range[1])
     : undefined
-  return placeNode(prevToken.type === LegacyAlias
-    ? ast.legacyAlias(prevToken.value, raw)
-    : ast.identifier(prevToken.value, raw), prevToken)
+  return placeNode(
+    prevToken.type === LegacyAlias
+      ? ast.legacyAlias(prevToken.value, raw)
+      : ast.identifier(prevToken.value, raw),
+    prevToken
+  )
 }
 
 // Converts built-in identifiers, which are usually literals in the value
 // context, to user identifiers if their context expects a variable or not
 // a value.
 
-function convertSpecialLiteralsToIdentifier () {
+function convertSpecialLiteralsToIdentifier() {
   switch (token.type) {
     case UndefinedLiteral:
       token.type = Identifier
@@ -2011,7 +2175,7 @@ function convertSpecialLiteralsToIdentifier () {
 //   "#" {[0-9a-f]+} |
 //   "true" | "false" | "undefined"
 
-function parseLiteral (allowXlate) {
+function parseLiteral(allowXlate) {
   const startToken = token
   let tokenType = token.type
   let tokenValue = token.value
@@ -2025,15 +2189,17 @@ function parseLiteral (allowXlate) {
       tokenValue = token.value
       negative = true
     }
-  } else if (tokenType & KeywordOrIdentifier && tokenValue === 'assoc' &&
-      nextToken.type === Punctuator && nextToken.value === '{') {
+  } else if (
+    tokenType & KeywordOrIdentifier &&
+    tokenValue === 'assoc' &&
+    nextToken.type === Punctuator &&
+    nextToken.value === '{'
+  ) {
     return parseAssocExpression()
   }
   if (!(tokenType & Literal)) handleUnexpectedToken(token, '<literal>')
   advanceToNextToken()
-  let raw = includeRawLiterals
-    ? input.slice(prevToken.range[0], prevToken.range[1])
-    : undefined
+  let raw = includeRawLiterals ? input.slice(prevToken.range[0], prevToken.range[1]) : undefined
   if (negative) {
     tokenValue = -tokenValue
     if (includeRawLiterals) raw = `-${raw}`
@@ -2044,7 +2210,7 @@ function parseLiteral (allowXlate) {
 // <ObjRef> ::=
 //   "#" {[0-9a-f]+}
 
-function parseObjRef () {
+function parseObjRef() {
   if (token.type !== ObjRef) handleUnexpectedToken(token, '<objref>')
   return parseLiteral()
 }
@@ -2052,10 +2218,12 @@ function parseObjRef () {
 // <Modifier> ::=
 //   "override" | "public" | "private"
 
-function tryModifier () {
+function tryModifier() {
   const value = token.value
   switch (value) {
-    case 'override': case 'public': case 'private':
+    case 'override':
+    case 'public':
+    case 'private':
       advanceToNextToken()
       return value
   }
@@ -2064,7 +2232,7 @@ function tryModifier () {
 // <Type> ::=
 //   "boolean" | ...
 
-function tryType () {
+function tryType() {
   const value = token.value
   if (value !== null && isType(value)) {
     advanceToNextToken()
@@ -2075,11 +2243,11 @@ function tryType () {
 // <TypeOfVariable> ::=
 //   ("boolean" | ...) <Identifier>
 
-function tryTypeOfVariable () {
+function tryTypeOfVariable() {
   const value = token.value
   // A type identifier will be recognized as a type only if it is followed
   // by a variable identifier (in a variable declaration statement)
-  if (value !== null && isType(value) && (nextToken.type & KeywordOrIdentifier)) {
+  if (value !== null && isType(value) && nextToken.type & KeywordOrIdentifier) {
     advanceToNextToken()
     return value
   }
@@ -2088,7 +2256,7 @@ function tryTypeOfVariable () {
 // <Type> ::=
 //   "boolean" | ...
 
-function checkType () {
+function checkType() {
   const type = tryType()
   if (!type) handleUnexpectedToken(token, '<type>')
   return type
@@ -2122,7 +2290,7 @@ function checkType () {
 
 let includeTokens // if an array of tokens should be attached to the parsed AST
 
-function parseText (_input, _options) {
+function parseText(_input, _options) {
   initialize(_input, _options)
 
   if (includeTokens) {
@@ -2140,7 +2308,7 @@ function parseText (_input, _options) {
   return program
 }
 
-function parseTokens (_input, _tokens, _options) {
+function parseTokens(_input, _tokens, _options) {
   initialize(_input, _options)
 
   tokens = _tokens
@@ -2152,7 +2320,7 @@ function parseTokens (_input, _tokens, _options) {
   return parseProgram()
 }
 
-function tokenize (_input, _options) {
+function tokenize(_input, _options) {
   initialize(_input, _options)
 
   const tokens = []
@@ -2163,17 +2331,17 @@ function tokenize (_input, _options) {
   return tokens.slice(0, tokens.length - 1)
 }
 
-function startTokenization (_input, _options) {
+function startTokenization(_input, _options) {
   initialize(_input, _options)
 
   return iterate()
 }
 
-function initialize (_input, _options) {
+function initialize(_input, _options) {
   // Transfer the input options to global variables
   const options = Object.assign({}, defaultOptions, _options)
-  let includeRaw;
-  ({
+  let includeRaw
+  ;({
     tokens: includeTokens,
     preprocessor: includePreprocessor,
     comments: includeComments,
@@ -2221,7 +2389,7 @@ function initialize (_input, _options) {
   warnings = []
 }
 
-function * iterate () {
+function* iterate() {
   const tokens = []
   onCreateToken = token => tokens.push(token)
 
@@ -2239,6 +2407,4 @@ function * iterate () {
   }
 }
 
-export {
-  defaultOptions, tokenTypes, startTokenization, tokenize, parseText, parseTokens
-}
+export { defaultOptions, tokenTypes, startTokenization, tokenize, parseText, parseTokens }

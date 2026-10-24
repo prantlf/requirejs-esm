@@ -5,6 +5,6 @@
 //   // Unexpected function in token
 //   formatMessage('Unexpected %2 in %1.', 'token', 'function')
 
-export default function formatMessage (format, ...args) {
+export default function formatMessage(format, ...args) {
   return format.replace(/%(\d)/g, (match, index) => '' + args[index - 1])
 }

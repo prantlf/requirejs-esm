@@ -5,20 +5,36 @@ const tehanu = require('tehanu')
 const { parseModule } = require('meriyah')
 const { generate } = require('astring')
 const { load, write } = require('../dist/plugin')
-const { transform, transformAst, resolvePath, detectDefinesOrRequires, detectImportsAndExports } = require('../dist/api')
+const {
+  transform,
+  transformAst,
+  resolvePath,
+  detectDefinesOrRequires,
+  detectImportsAndExports
+} = require('../dist/api')
 const { req, config, onload } = require('./mock')
 
 const test = tehanu('esm')
 
 test('transform with sourcemap', () => {
-  const code = transform('import A from "name"', 'test.js', { useStrict: false, sourceMap: true }).code
-  equal(code, `define(["esm!name"], function (A) {});
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`)
+  const code = transform('import A from "name"', 'test.js', {
+    useStrict: false,
+    sourceMap: true
+  }).code
+  equal(
+    code,
+    `define(["esm!name"], function (A) {});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInRlc3QuanMiXSwibmFtZXMiOlsiQSJdLCJtYXBwaW5ncyI6IlFBQWMsdUJBQVBBIiwiZmlsZSI6InRlc3QuanMiLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgQSBmcm9tIFwibmFtZVwiIl19`
+  )
 })
 
 test('transform can skip if no import export', () => {
   const ast = parseModule('class A {}', { next: true })
-  const { updated } = transformAst(ast, { sourceFileName: 'test.js', useStrict: false, skipIfNoImportExport: true })
+  const { updated } = transformAst(ast, {
+    sourceFileName: 'test.js',
+    useStrict: false,
+    skipIfNoImportExport: true
+  })
   ok(!updated)
 })
 
@@ -34,20 +50,31 @@ test('transform can process if no import export but forced by comment', () => {
 class A {}`
   const { code, updated } = transform(source, 'test.js', { skipIfNoImportExport: true })
   ok(updated)
-  equal(code, `define(function () {
+  equal(
+    code,
+    `define(function () {
   "use strict";
   class A {}
 });
-`)
+`
+  )
 })
 
 test('transformAst works', () => {
   const ast = parseModule('import A from "name"', { next: true })
-  const { updated } = transformAst(ast, { sourceFileName: 'test.js', pluginName: 'esm', resolvePath, useStrict: false })
+  const { updated } = transformAst(ast, {
+    sourceFileName: 'test.js',
+    pluginName: 'esm',
+    resolvePath,
+    useStrict: false
+  })
   ok(updated)
   const code = generate(ast)
-  equal(code, `define(["esm!name"], function (A) {});
-`)
+  equal(
+    code,
+    `define(["esm!name"], function (A) {});
+`
+  )
 })
 
 test('detectDefinesOrRequires works', () => {
@@ -70,24 +97,36 @@ test('detectImportsAndExports works', () => {
 
 test('splits default export of named class', () => {
   const source = 'export default class A {}'
-  const { code, updated } = transform(source, 'test.js', { splitDefaultNamedDeclarations: true, useStrict: false })
+  const { code, updated } = transform(source, 'test.js', {
+    splitDefaultNamedDeclarations: true,
+    useStrict: false
+  })
   ok(updated)
-  equal(code, `define(function () {
+  equal(
+    code,
+    `define(function () {
   class A {}
   return A;
 });
-`)
+`
+  )
 })
 
 test('splits default export of named function', () => {
   const source = 'export default function A() {}'
-  const { code, updated } = transform(source, 'test.js', { splitDefaultNamedDeclarations: true, useStrict: false })
+  const { code, updated } = transform(source, 'test.js', {
+    splitDefaultNamedDeclarations: true,
+    useStrict: false
+  })
   ok(updated)
-  equal(code, `define(function () {
+  equal(
+    code,
+    `define(function () {
   function A() {}
   return A;
 });
-`)
+`
+  )
 })
 
 async function pluginLoad(input) {
@@ -118,7 +157,10 @@ async function pluginWrite(input) {
   equal(names.length, 2)
   equal(names[0], `test/input/${input}`)
   equal(names[1], `esm!test/input/${input}`)
-  equal(codes[0], 'define(function () {\n  "use strict";\n  let _exports = {};\n  let A, B;\n  _exports.A = A;\n  _exports.B = B;\n  return _exports;\n});\n')
+  equal(
+    codes[0],
+    'define(function () {\n  "use strict";\n  let _exports = {};\n  let A, B;\n  _exports.A = A;\n  _exports.B = B;\n  return _exports;\n});\n'
+  )
   equal(codes[1], `\ndefine(['test/input/${input}'], res => res);\n`)
 }
 
@@ -144,7 +186,7 @@ ${actual}`)
 function firstLineComment(text) {
   const cr = text.indexOf('\r')
   const lf = text.indexOf('\n')
-  const eoln = cr < lf ? cr < 0 ? lf : cr : lf
+  const eoln = cr < lf ? (cr < 0 ? lf : cr) : lf
   if (eoln < 0) throw new Error('First line with comment missing.')
   return text.slice(3, eoln)
 }

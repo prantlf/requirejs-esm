@@ -1,1 +1,1 @@
-require(['esm!src/class']);
+require(['esm!src/class'])

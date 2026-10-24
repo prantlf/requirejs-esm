@@ -9,9 +9,7 @@
       "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/build/index.js",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "name": "esm2requirejs",
@@ -42,18 +40,14 @@
       "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/server.js",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "skipFiles": ["<node_internals>/**"]
     },
     {
       "name": "test",
       "type": "pwa-node",
       "request": "launch",
       "program": "${workspaceFolder}/test/index.js",
-      "skipFiles": [
-        "<node_internals>/**"
-      ]
+      "skipFiles": ["<node_internals>/**"]
     }
- ]
+  ]
 }

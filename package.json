@@ -2,28 +2,24 @@
   "name": "requirejs-esm",
   "version": "4.4.0",
   "description": "A RequireJS plugin converting JavaScript modules from ESM to AMD.",
-  "author": "Ferdinand Prantl <prantlf@gmail.com>",
-  "license": "MIT",
-  "licenses": [
-    {
-      "type": "MIT",
-      "url": "https://github.com/prantlf/requirejs-esm/blob/master/LICENSE"
-    }
+  "keywords": [
+    "amd",
+    "es6",
+    "esm",
+    "plugin",
+    "requirejs",
+    "requirejs-plugin"
   ],
   "homepage": "https://github.com/prantlf/requirejs-esm#readme",
+  "bugs": {
+    "url": "https://github.com/prantlf/requirejs-esm/issues"
+  },
+  "license": "MIT",
+  "author": "Ferdinand Prantl <prantlf@gmail.com>",
   "repository": {
     "type": "git",
     "url": "https://github.com/prantlf/requirejs-esm.git"
   },
-  "bugs": {
-    "url": "https://github.com/prantlf/requirejs-esm/issues"
-  },
-  "engines": {
-    "node": ">=18"
-  },
-  "main": "dist/api.js",
-  "module": "src/api.js",
-  "types": "src/api.d.ts",
   "bin": {
     "esm2requirejs": "bin/esm2requirejs.js"
   },
@@ -32,6 +28,15 @@
     "dist",
     "src"
   ],
+  "type": "module",
+  "main": "dist/api.js",
+  "module": "src/api.js",
+  "types": "src/api.d.ts",
+  "exports": {
+    "require": "./dist/api.js",
+    "import": "./src/api.js",
+    "types": "./src/api.d.ts"
+  },
   "scripts": {
     "build": "node build",
     "demo": "npm run demo:extern && npm run demo:local",
@@ -41,62 +46,65 @@
     "demo:local": "npm run optimize:local && npm run minify:local",
     "optimize:local": "r.js -o demo-local/build.config.js",
     "minify:local": "terser -cm --ecma 2018 --comments false --source-map content=demo-local/main-built.js.map --source-map includeSources --source-map url=main-built.min.js.map -o demo-local/main-built.min.js demo-local/main-built.js",
-    "lint": "biome lint src bin perf/*.js bin test/*.js",
+    "lint": "oxlint",
     "fix": "npm run lint -- --fix",
+    "format": "oxfmt",
     "check": "tehanu test/*.js",
     "cover": "c8 node test && c8 --no-clean ./bin/esm2requirejs.js && c8 --no-clean ./bin/esm2requirejs.js test/input/esm-import-all.js && c8 --no-clean ./bin/esm2requirejs.js dummy || c8 report -r text -r lcov | grep -Ev '(\\.\\.\\.)|(index.mjs)|(source-map.js)|(base64-vlq.js)|(base64.js)|(binary-search.js)|(mapping-list.js)|(read-wasm-browser.js)|(url-browser.js)|(wasm.js)|(regexes.js)|(public-api.js)|(All files)' && c8 check-coverage",
     "test": "npm run lint && npm run cover",
     "start": "python3 -m http.server"
   },
-  "tehanu": {
-    "autostart": false
+  "dependencies": {
+    "@prantlf/convert-source-map": "^3.0.2",
+    "astring": "^1.9.0",
+    "charcodes": "^0.2.1",
+    "commander": "^15.0.0",
+    "meriyah": "^7.4.0",
+    "punycode": "^2.3.1",
+    "source-map": "0.8.0-beta.0",
+    "tiny-glob": "^0.2.9"
+  },
+  "devDependencies": {
+    "@prantlf/requirejs": "^3.4.0",
+    "@rollup/plugin-commonjs": "^29.0.3",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^16.0.3",
+    "c8": "^12.0.0",
+    "lit-html": "^1",
+    "oxfmt": "^0.74.0",
+    "oxlint": "^1.89.0",
+    "rollup": "^4.64.12",
+    "tehanu": "^1.0.1",
+    "tehanu-repo-coco": "^1.0.1",
+    "tehanu-teru": "^1.0.1",
+    "terser": "^5.51.2"
   },
   "c8": {
+    "branches": 45,
+    "exclude": [
+      "node_modules/**"
+    ],
+    "excludeNodeModules": true,
+    "functions": 20,
     "include": [
       "bin/*",
       "src/**",
       "dist/*"
     ],
-    "excludeNodeModules": true,
-    "exclude": [
-      "node_modules/**"
-    ],
+    "lines": 42,
     "reporter": [],
-    "branches": 45,
-    "lines": 45,
-    "functions": 20,
-    "statements": 45
+    "statements": 42
   },
-  "dependencies": {
-    "@prantlf/convert-source-map": "^3.0.2",
-    "astring": "^1.9.0",
-    "charcodes": "^0.2.1",
-    "commander": "^14.0.3",
-    "meriyah": "^7.1.0",
-    "punycode": "^2.3.1",
-    "source-map": "^0.8.0-beta.0",
-    "tiny-glob": "^0.2.9"
+  "engines": {
+    "node": ">=22"
   },
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.16",
-    "@prantlf/requirejs": "^3.4.0",
-    "@rollup/plugin-commonjs": "^29.0.3",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^16.0.3",
-    "c8": "^11.0.0",
-    "lit-html": "^1",
-    "rollup": "^4.61.1",
-    "tehanu": "^1.0.1",
-    "tehanu-repo-coco": "^1.0.1",
-    "tehanu-teru": "^1.0.1",
-    "terser": "^5.48.0"
-  },
-  "keywords": [
-    "requirejs-plugin",
-    "requirejs",
-    "plugin",
-    "amd",
-    "esm",
-    "es6"
-  ]
+  "licenses": [
+    {
+      "type": "MIT",
+      "url": "https://github.com/prantlf/requirejs-esm/blob/master/LICENSE"
+    }
+  ],
+  "tehanu": {
+    "autostart": false
+  }
 }

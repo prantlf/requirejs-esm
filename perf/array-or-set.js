@@ -1,5 +1,5 @@
-const { createSuite } = require('./suite')
-const { equal } = require('node:assert')
+import { equal } from 'node:assert'
+import { createSuite } from './suite.js'
 
 const skipModulesFew = [
   'lib/vendor/backbone',
@@ -47,9 +47,7 @@ const skipModulesMany = [
   'lib/vendor/jquery.dataTables/js/jquery.dataTables',
   'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
 ]
-const skipModulesPrefix = [
-  'lib/vendor/'
-]
+const skipModulesPrefix = ['lib/vendor/']
 const skipModuleFewSet = new Set(skipModulesFew)
 const skipModuleManySet = new Set(skipModulesMany)
 const skipModulePrefixSet = new Set(skipModulesPrefix)
@@ -77,40 +75,68 @@ async function checkModuleNames() {
   equal(usingArray(skipModulesFew, 'unknown'), false)
   equal(usingSet(skipModuleFewSet, 'lib/vendor/marionette'), true)
   equal(usingSet(skipModuleFewSet, 'unknown'), false)
-  equal(usingArray(skipModulesMany, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'), true)
+  equal(
+    usingArray(skipModulesMany, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'),
+    true
+  )
   equal(usingArray(skipModulesMany, 'lib/vendor/unknown'), false)
-  equal(usingSet(skipModuleManySet, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'), true)
+  equal(
+    usingSet(skipModuleManySet, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'),
+    true
+  )
   equal(usingSet(skipModuleManySet, 'lib/vendor/unknown'), false)
-  equal(usingArray(skipModulesPrefix, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'), true)
+  equal(
+    usingArray(
+      skipModulesPrefix,
+      'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
+    ),
+    true
+  )
   equal(usingArray(skipModulesPrefix, 'lib/own/unknown'), false)
-  equal(usingSet(skipModulePrefixSet, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'), true)
+  equal(
+    usingSet(
+      skipModulePrefixSet,
+      'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
+    ),
+    true
+  )
   equal(usingSet(skipModulePrefixSet, 'lib/own/unknown'), false)
 
   createSuite('Looking up module names...')
-    .add('known using an array of few', () =>
-      usingArray(skipModulesFew, 'lib/vendor/marionette'))
-    .add('known using a set of few', () =>
-      usingSet(skipModuleFewSet, 'lib/vendor/marionette'))
-    .add('unknown using an array of few', () =>
-      usingArray(skipModulesFew, 'unknown'))
-    .add('unknown using a set of few', () =>
-      usingSet(skipModuleFewSet, 'unknown'))
+    .add('known using an array of few', () => usingArray(skipModulesFew, 'lib/vendor/marionette'))
+    .add('known using a set of few', () => usingSet(skipModuleFewSet, 'lib/vendor/marionette'))
+    .add('unknown using an array of few', () => usingArray(skipModulesFew, 'unknown'))
+    .add('unknown using a set of few', () => usingSet(skipModuleFewSet, 'unknown'))
     .add('known using an array of many', () =>
-      usingArray(skipModulesMany, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'))
+      usingArray(
+        skipModulesMany,
+        'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
+      )
+    )
     .add('known using a set of many', () =>
-      usingSet(skipModuleManySet, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'))
-    .add('unknown using an array of many', () =>
-      usingArray(skipModulesMany, 'lib/vendor/unknown'))
-    .add('unknown using a set of many', () =>
-      usingSet(skipModuleManySet, 'lib/vendor/unknown'))
+      usingSet(
+        skipModuleManySet,
+        'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
+      )
+    )
+    .add('unknown using an array of many', () => usingArray(skipModulesMany, 'lib/vendor/unknown'))
+    .add('unknown using a set of many', () => usingSet(skipModuleManySet, 'lib/vendor/unknown'))
     .add('known using an array with a prefix', () =>
-      usingArray(skipModulesPrefix, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'))
+      usingArray(
+        skipModulesPrefix,
+        'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
+      )
+    )
     .add('known using a set with a prefix', () =>
-      usingSet(skipModulePrefixSet, 'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'))
+      usingSet(
+        skipModulePrefixSet,
+        'lib/vendor/jquery.dataTables.tableTools/js/dataTables.tableTools'
+      )
+    )
     .add('unknown using an array with a prefix', () =>
-      usingArray(skipModulesMany, 'lib/own/unknown'))
-    .add('unknown using a set with a prefix', () =>
-      usingSet(skipModuleManySet, 'lib/own/unknown'))
+      usingArray(skipModulesMany, 'lib/own/unknown')
+    )
+    .add('unknown using a set with a prefix', () => usingSet(skipModuleManySet, 'lib/own/unknown'))
     .start()
 }
 

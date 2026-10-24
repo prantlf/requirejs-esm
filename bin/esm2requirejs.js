@@ -1,14 +1,13 @@
 #!/usr/bin/env node
 
-// Require module dependencies.
-const { Command } = require('commander')
-const glob = require('tiny-glob')
-const { readFile, writeFile } = require('node:fs/promises')
-const { transform } = require('../dist/api')
+import { readFile, writeFile } from 'node:fs/promises'
+import { Command } from 'commander'
+import glob from 'tiny-glob'
+import { transform } from '../src/api.js'
 
-// Define the command-line interface.
 const program = new Command()
-program.description('Transforms an ESM module to AMD or adapts an AMD module for requirejs-esm.')
+program
+  .description('Transforms an ESM module to AMD or adapts an AMD module for requirejs-esm.')
   .name('esm2requirejs')
   .usage('[options] <files>')
   // .option('-e, --ecma <version>', 'change the ECMAScript version from 2020 to other one')
@@ -16,8 +15,14 @@ program.description('Transforms an ESM module to AMD or adapts an AMD module for
   .option('-o, --output <file>', 'write the adapted module source to a file')
   .option('-r, --rewrite', 'rewrite the input files with the adapted output')
   .option('-s, --source-map', 'write inline source maps to the adapted output')
-  .option('-a, --skip-if-no-import-export', 'assume AMD/UMD if there\'re no import or export statements')
-  .option('-d, --split-default-named-declarations', 'split default named export to declaration and export')
+  .option(
+    '-a, --skip-if-no-import-export',
+    "assume AMD/UMD if there're no import or export statements"
+  )
+  .option(
+    '-d, --split-default-named-declarations',
+    'split default named export to declaration and export'
+  )
   .option('-v, --verbose', 'print progress and call stack in case of error')
   .argument('[files...]')
   .on('--help', () => {
@@ -29,7 +34,7 @@ program.description('Transforms an ESM module to AMD or adapts an AMD module for
     console.log('Examples:')
     console.log()
     console.log('  $ esm2requirejs -s -o out/main.js src/main.js')
-    console.log('  $ esm2requirejs -p \'\' -r \'src/**/*.js\'')
+    console.log("  $ esm2requirejs -p '' -r 'src/**/*.js'")
   })
   .parse(process.argv)
 
@@ -48,37 +53,34 @@ if (!args.length) {
   program.help()
 }
 
-// Main entry point.
-((async () => {
-  try {
-    const files = (await Promise.all(args.map(arg => glob(arg)))).flat()
-    if (!files.length) {
-      throw new Error('no files found')
-    }
-    for (const file of files) {
-      const text = await readFile(file, 'utf8')
-      const { code, updated } = transform(text, file, {
-        /*ecmaVersion,*/
-        pluginName,
-        sourceMap,
-        skipIfNoImportExport,
-        splitDefaultNamedDeclarations,
-        verbose
-      })
-      if (updated) {
-        if (outputFile) {
-          await writeFile(outputFile, code)
-        } else if (rewrite) {
-          await writeFile(file, code)
-        } else {
-          console.log(`// ${file}\n\n${code}`)
-        }
-      } else {
-        console.log(`// ${file}\n\nnot updated`)
-      }
-    }
-  } catch (error) {
-    console.error((!verbose && error.message) || error)
-    process.exitCode = 1
+try {
+  const files = (await Promise.all(args.map(arg => glob(arg)))).flat()
+  if (!files.length) {
+    throw new Error('no files found')
   }
-})())
+  for (const file of files) {
+    const text = await readFile(file, 'utf8')
+    const { code, updated } = transform(text, file, {
+      /*ecmaVersion,*/
+      pluginName,
+      sourceMap,
+      skipIfNoImportExport,
+      splitDefaultNamedDeclarations,
+      verbose
+    })
+    if (updated) {
+      if (outputFile) {
+        await writeFile(outputFile, code)
+      } else if (rewrite) {
+        await writeFile(file, code)
+      } else {
+        console.log(`// ${file}\n\n${code}`)
+      }
+    } else {
+      console.log(`// ${file}\n\nnot updated`)
+    }
+  }
+} catch (error) {
+  console.error((!verbose && error.message) || error)
+  process.exitCode = 1
+}

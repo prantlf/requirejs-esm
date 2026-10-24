@@ -1,8 +1,11 @@
 import {
-  identifier, memberExpression, assignmentExpression, expressionStatement
-} from './factories'
-import { isValidIdentifier } from './validators'
-import { isIdentifierChar } from './identifier'
+  identifier,
+  memberExpression,
+  assignmentExpression,
+  expressionStatement
+} from './factories.js'
+import { isIdentifierChar } from './identifier.js'
+import { isValidIdentifier } from './validators.js'
 
 export function toIdentifier(input) {
   input = `${input}`
@@ -14,7 +17,7 @@ export function toIdentifier(input) {
 
   name = name.replace(/^[-0-9]+/, '')
 
-  name = name.replace(/[-\s]+(.)?/g, (_match, c) => c ? c.toUpperCase() : '')
+  name = name.replace(/[-\s]+(.)?/g, (_match, c) => (c ? c.toUpperCase() : ''))
 
   if (!isValidIdentifier(name)) {
     name = `_${name}`
@@ -56,8 +59,11 @@ export function toStatement(node, ignore) {
   if (type === 'ClassDeclaration' || type === 'ClassExpression') {
     mustHaveId = true
     newType = 'ClassDeclaration'
-  } else if (type === 'FunctionDeclaration' || type === 'FunctionExpression' ||
-             type === 'ArrowFunctionExpression') {
+  } else if (
+    type === 'FunctionDeclaration' ||
+    type === 'FunctionExpression' ||
+    type === 'ArrowFunctionExpression'
+  ) {
     mustHaveId = true
     newType = 'FunctionDeclaration'
   } else if (type === 'AssignmentExpression') {
@@ -86,8 +92,10 @@ export function replaceLiteral(literal, value) {
   const { raw } = literal
   if (raw === undefined) return
   if (typeof value === 'string') {
-    literal.raw = String(raw).charAt(0) === "'" ?
-      `'${value.replaceAll("'", "\\'")}'` : `"${value.replaceAll('"', '\\"')}"`
+    literal.raw =
+      String(raw).charAt(0) === "'"
+        ? `'${value.replaceAll("'", "\\'")}'`
+        : `"${value.replaceAll('"', '\\"')}"`
   } else {
     literal.raw = String(value)
   }
@@ -95,6 +103,7 @@ export function replaceLiteral(literal, value) {
 
 // Returns a statement assigning a property value to the exports object.
 export function exportStatement(exportsVar, key, value) {
-  return toStatement(assignmentExpression('=',
-    memberExpression(exportsVar, identifier(key)), value))
+  return toStatement(
+    assignmentExpression('=', memberExpression(exportsVar, identifier(key)), value)
+  )
 }

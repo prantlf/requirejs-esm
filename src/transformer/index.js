@@ -1,6 +1,6 @@
-import { detectDefinesOrRequires, updateAmdDeps, callAmdUpdateHooks } from './amd'
-import { detectImportsAndExports, transformEsmToAmd } from './esm'
-import { processOrSkipByComment } from './comments'
+import { detectDefinesOrRequires, updateAmdDeps, callAmdUpdateHooks } from './amd.js'
+import { processOrSkipByComment } from './comments.js'
+import { detectImportsAndExports, transformEsmToAmd } from './esm.js'
 
 export function transformAst(program, options = {}) {
   const amds = detectDefinesOrRequires(program)
